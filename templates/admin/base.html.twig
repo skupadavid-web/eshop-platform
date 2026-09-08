@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="cs" data-store="tsp">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Administrace{% endblock %} · Platforma</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext y='14' font-size='14'%3E%F0%9F%91%95%3C/text%3E%3C/svg%3E">
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700&family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    {{ importmap('app') }}
+</head>
+<body>
+<div class="admin">
+    <aside class="aside">
+        <div class="abrand"><span class="mark" aria-hidden="true">{{ shirt('#0b5fa5', 'blank') }}</span>Platforma</div>
+        <div class="agroup">Provoz</div>
+        <a href="{{ path('admin_dashboard') }}" class="{{ app.request.attributes.get('_route') == 'admin_dashboard' ? 'active' : '' }}">Přehled</a>
+        <a href="{{ path('admin_dashboard') }}">Objednávky</a>
+        <a href="{{ path('admin_dashboard') }}">Produkty</a>
+        <div class="agroup">Obsah &amp; web</div>
+        <a href="{{ path('admin_dashboard') }}">Kategorie</a>
+        <a href="{{ path('admin_dashboard') }}">Stránky a URL</a>
+        <a href="{{ path('admin_dashboard') }}">Feedy</a>
+        <div class="agroup">Nastavení</div>
+        <a href="{{ path('admin_dashboard') }}">Eshopy a domény</a>
+        <a href="{{ path('admin_dashboard') }}">Doprava a platba</a>
+        <a href="{{ path('admin_dashboard') }}">Uživatelé a role</a>
+        <div class="astore">
+            Přihlášen: <b style="color:#dbe4f0">{{ app.user ? app.user.email : '' }}</b><br>
+            <a href="{{ path('admin_logout') }}" style="color:#cfdaea;text-decoration:underline">Odhlásit</a>
+        </div>
+    </aside>
+    <div class="amain">{% block body %}{% endblock %}</div>
+</div>
+</body>
+</html>

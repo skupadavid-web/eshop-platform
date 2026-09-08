@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="cs" data-store="tsp">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Přihlášení · Platforma</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    {{ importmap('app') }}
+</head>
+<body>
+<div class="login-wrap">
+    <form class="login-card" method="post">
+        <h1 class="logo" style="font-size:22px;justify-content:center"><span class="mark" style="width:26px;height:26px" aria-hidden="true">{{ shirt('#0b5fa5', 'blank') }}</span>Platforma</h1>
+        <p style="text-align:center;color:var(--ink-muted);font-size:14px;margin:6px 0 20px">Administrace multi-eshop systému</p>
+        {% if error %}
+            <p style="background:var(--danger-tint);color:var(--danger);padding:10px 12px;border-radius:8px;font-size:14px;margin-bottom:14px">
+                {{ error.messageKey|trans(error.messageData, 'security') }}
+            </p>
+        {% endif %}
+        <label class="field full" style="margin-bottom:12px"><span>E-mail</span>
+            <input type="email" name="_username" value="{{ last_username }}" autocomplete="username" required autofocus></label>
+        <label class="field full" style="margin-bottom:16px"><span>Heslo</span>
+            <input type="password" name="_password" autocomplete="current-password" required></label>
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+        <button class="btn btn-primary btn-lg">Přihlásit se</button>
+        <p style="text-align:center;font-size:13px;color:var(--ink-muted);margin-top:14px">Druhý faktor (TOTP) se doplní v E8.</p>
+    </form>
+</div>
+</body>
+</html>

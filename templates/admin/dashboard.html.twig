@@ -1,0 +1,14 @@
+{% extends 'admin/base.html.twig' %}
+{% block title %}Přehled{% endblock %}
+{% block body %}
+<div class="apage-head"><div><h1>Přehled</h1><div class="sub">Administrace multi-eshop systému</div></div></div>
+<div class="stat-row">
+    <div class="stat"><div class="k">Eshopy</div><div class="v num">{{ stats.stores }}</div><div class="d">v tabulce stores</div></div>
+    <div class="stat"><div class="k">Produkty</div><div class="v num">{{ stats.products }}</div><div class="d">před migrací (E3)</div></div>
+    <div class="stat"><div class="k">Objednávky</div><div class="v num">{{ stats.orders }}</div><div class="d">centrální evidence</div></div>
+    <div class="stat"><div class="k">Schéma</div><div class="v num">41</div><div class="d">tabulek (E2)</div></div>
+</div>
+<div class="panel"><h3>Stav</h3><div class="panel-pad">
+    <p style="color:var(--ink-muted)">Datový model (E2) je nasazený. CRUD moduly se přidávají v E6, katalog s reálnými daty v E4 po migraci (E3).</p>
+</div></div>
+{% endblock %}

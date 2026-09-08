@@ -1,4 +1,6 @@
-# Enable stateless CSRF protection for forms and logins/logouts
+# Stateless (double-submit-cookie) CSRF for storefront forms that ship with the
+# Stimulus csrf controller. Admin login/logout use classic session CSRF so they
+# work without JavaScript.
 framework:
     form:
         csrf_protection:
@@ -7,5 +9,3 @@ framework:
     csrf_protection:
         stateless_token_ids:
             - submit
-            - authenticate
-            - logout
