@@ -1,0 +1,9 @@
+{% extends 'base.html.twig' %}
+{% block title %}404 — {{ store.name }}{% endblock %}
+{% block body %}
+<div class="wrap"><div class="confirm">
+    <h1>{{ 'error404.title'|trans }}</h1>
+    <p class="lede" style="text-align:center">{{ 'error404.body'|trans }}</p>
+    <a class="btn btn-primary" href="{{ path('home') }}">{{ 'error404.home'|trans }}</a>
+</div></div>
+{% endblock %}

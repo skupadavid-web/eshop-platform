@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 namespace App\Store;
 
-/**
- * The catalogue of storefronts. Phase 1 keeps this in code; later it moves to the
- * `stores` table without changing callers.
- */
 final class StoreRegistry
 {
     /** @var array<string,Store> */
@@ -17,11 +13,11 @@ final class StoreRegistry
     {
         $this->stores = [];
         foreach ([
-            new Store('tsp', 'Trička s potiskem', 'trickaspotiskem.eu', 'cs', 'CZK', 'tsl'),
-            new Store('tsl', 'Tričká s potlačou', 'trickaspotlacou.eu', 'sk', 'EUR', 'tsp'),
-            new Store('cd', 'Cool dresy', 'cooldresy.cz', 'cs', 'CZK'),
-        ] as $store) {
-            $this->stores[$store->code] = $store;
+            new Store('tsp', 'Trička s potiskem', 'trickaspotiskem.eu', 'cs', 'CZK', 'tsp', 'info@trickaspotiskem.eu', '+420 777 240 837', 'tsl'),
+            new Store('tsl', 'Tričká s potlačou', 'trickaspotlacou.eu', 'sk', 'EUR', 'tsl', 'info@trickaspotlacou.eu', '+420 777 240 837', 'tsp'),
+            new Store('cd', 'Cool dresy', 'cooldresy.cz', 'cs', 'CZK', 'cd', 'info@cooldresy.cz', '+420 777 240 837'),
+        ] as $s) {
+            $this->stores[$s->code] = $s;
         }
     }
 
@@ -33,14 +29,9 @@ final class StoreRegistry
 
     public function get(string $code): Store
     {
-        return $this->stores[$code]
-            ?? throw new \InvalidArgumentException(sprintf('Unknown store "%s".', $code));
+        return $this->stores[$code] ?? throw new \InvalidArgumentException(sprintf('Unknown store "%s".', $code));
     }
 
-    /**
-     * Resolve a storefront from an incoming HTTP host. Handles www prefix, port,
-     * and the local *.ddev.site development suffix.
-     */
     public function findByHost(string $host): ?Store
     {
         $host = strtolower($host);

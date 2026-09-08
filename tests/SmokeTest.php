@@ -10,13 +10,26 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class SmokeTest extends WebTestCase
 {
-    public function testHomepageRenders(): void
+    #[DataProvider('storefrontRoutes')]
+    public function testStorefrontPageRenders(string $path): void
     {
         $client = static::createClient();
-        $client->request('GET', '/');
+        $client->request('GET', $path);
 
         self::assertResponseIsSuccessful();
-        self::assertSelectorTextContains('h1', 'Eshop platforma');
+        self::assertSelectorExists('header .subnav');
+        self::assertSelectorExists('footer.sfoot');
+    }
+
+    /** @return iterable<string,array{0:string}> */
+    public static function storefrontRoutes(): iterable
+    {
+        yield 'home' => ['/'];
+        yield 'category' => ['/kategorie/vtipna-tricka'];
+        yield 'product' => ['/produkt/tricko-s-kockou-damske'];
+        yield 'cart' => ['/kosik'];
+        yield 'checkout' => ['/pokladna'];
+        yield 'content page' => ['/stranka/kontakty'];
     }
 
     #[DataProvider('hostCases')]

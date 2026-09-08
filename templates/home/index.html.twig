@@ -1,31 +1,73 @@
 {% extends 'base.html.twig' %}
+{% import '_macros/ui.html.twig' as ui %}
+{% set loc = app.request.locale %}
 
-{% block title %}Eshop platforma — {{ store.name }}{% endblock %}
+{% block title %}{{ 'home.title'|trans }} — {{ store.name }}{% endblock %}
+{% block meta_description %}{{ 'home.meta'|trans }}{% endblock %}
 
 {% block body %}
-    <h1>Eshop platforma</h1>
-    <p class="sub">Vývojová kostra běží. Aktivní eshop podle domény: <strong>{{ store.name }}</strong>.</p>
+<div class="wrap">
+    <section class="hero">
+        <div class="stack" style="gap:18px">
+            <span class="eyebrow">{{ 'home.eyebrow'|trans }}</span>
+            <h1>{{ 'home.headline'|trans }}</h1>
+            <p class="lede">{{ 'home.lede'|trans }}</p>
+            <div class="cluster">
+                <a class="btn btn-primary" href="{{ path('category', {slug: view.menu[0].slug}) }}">{{ 'home.cta_browse'|trans }}</a>
+                <a class="btn btn-ghost" href="{{ path('product', {slug: bestsellers[0].slug}) }}">{{ 'home.cta_how'|trans }}</a>
+            </div>
+        </div>
+        <div class="fan" aria-hidden="true">
+            <div class="shirt-tile s1">{{ shirt('#3a8f4f', bestsellers[0].motif) }}</div>
+            <div class="shirt-tile s2">{{ shirt('#1d1c1a', 'code') }}</div>
+            <div class="shirt-tile s3">{{ shirt('#c0392b', 'heart') }}</div>
+        </div>
+    </section>
 
-    <div class="card">
-        <h2>Prostředí</h2>
-        <div class="kv"><span>PHP</span><span>{{ phpVersion }}</span></div>
-        <div class="kv"><span>Symfony</span><span>{{ symfonyVersion }} (LTS)</span></div>
-        <div class="kv"><span>Databáze</span>
-            <span class="{{ dbVersion ? 'ok' : 'bad' }}">{{ dbVersion ?: 'nedostupná' }}</span></div>
-        <div class="kv"><span>Locale</span><span>{{ app.request.locale }}</span></div>
-    </div>
+    <section class="section-tight">
+        <div class="cat-head"><h2>{{ 'home.bestsellers'|trans }}</h2>
+            <a class="link" href="{{ path('category', {slug: view.menu[0].slug}) }}">{{ 'all'|trans }} →</a></div>
+        <div class="pgrid">{% for p in bestsellers %}{{ ui.product_card(p, view, loc) }}{% endfor %}</div>
+    </section>
 
-    <div class="card">
-        <h2>Eshopy (multi-tenant)</h2>
-        <div class="stores">
-            {% for s in stores %}
-                <a class="store {{ s.code == store.code ? 'active' : '' }}"
-                   href="{{ app.request.scheme }}://{{ s.shortHost }}.ddev.site/">
-                    <span class="badge">{{ s.code|upper }}</span>
-                    <strong>{{ s.name }}</strong>
-                    <span style="color:#9c948a">{{ s.host }} · {{ s.locale }} · {{ s.currency }}</span>
+    <section class="section-tight">
+        <h2 style="margin-bottom:18px">{{ 'home.categories'|trans }}</h2>
+        <div class="cat-tiles">
+            {% for c in view.menu %}
+                <a class="cat-tile" href="{{ path('category', {slug: c.slug}) }}">
+                    <div class="mini">{{ shirt('#2456c9', 'heart') }}</div>
+                    <span>{{ c.name(loc) }}</span>
+                    <small style="color:var(--ink-faint)">{{ c.count }} {{ 'products'|trans }}</small>
                 </a>
             {% endfor %}
         </div>
-    </div>
+    </section>
+
+    <section class="section-tight">
+        <h2 style="margin-bottom:18px">{{ 'home.how_it_works'|trans }}</h2>
+        <div class="stepgrid">
+            <div class="step"><span class="n">01</span><b>{{ 'home.step1_t'|trans }}</b><p style="color:var(--ink-muted);font-size:14px">{{ 'home.step1_d'|trans }}</p></div>
+            <div class="step"><span class="n">02</span><b>{{ 'home.step2_t'|trans }}</b><p style="color:var(--ink-muted);font-size:14px">{{ 'home.step2_d'|trans }}</p></div>
+            <div class="step"><span class="n">03</span><b>{{ 'home.step3_t'|trans }}</b><p style="color:var(--ink-muted);font-size:14px">{{ 'home.step3_d'|trans }}</p></div>
+        </div>
+    </section>
+
+    <section class="section-tight"><div class="reviews-band">
+        <div class="big">98 %</div>
+        <div>
+            <p style="font-weight:600;margin-bottom:12px">{{ 'home.reviews_lead'|trans }}</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                <div class="rquote">„{{ 'home.review1'|trans }}"<div class="who">Martina K. · 2. 9. 2026</div></div>
+                <div class="rquote">„{{ 'home.review2'|trans }}"<div class="who">Jiří V. · 28. 8. 2026</div></div>
+            </div>
+        </div>
+    </div></section>
+
+    <section class="section-tight"><div class="seoblock">
+        <h2>{{ 'home.seo_h'|trans({'%store%': store.name}) }}</h2>
+        <p>{{ 'home.seo_p1'|trans }}</p>
+        <p>{{ 'home.seo_p2'|trans }}</p>
+        <p>{{ 'home.seo_p3'|trans }}</p>
+    </div></section>
+</div>
 {% endblock %}

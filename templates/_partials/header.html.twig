@@ -1,0 +1,44 @@
+{% import '_macros/ui.html.twig' as ui %}
+{% set loc = app.request.locale %}
+<div class="promo"><div class="wrap">
+    <span>{{ 'promo.print'|trans }}</span>
+    <span><b>{{ 'promo.shipping'|trans }}</b></span>
+    <span>{{ 'promo.returns'|trans }}</span>
+</div></div>
+
+<header class="shead"><div class="wrap shead-in">
+    <a href="{{ path('home') }}" class="logo">
+        <span class="mark" aria-hidden="true">{{ shirt('#0b5fa5', 'blank') }}</span>{{ store.name }}
+    </a>
+    <form class="search" role="search" action="{{ path('search') }}">
+        <span aria-hidden="true">⌕</span>
+        <input type="search" name="q" aria-label="{{ 'search.label'|trans }}" placeholder="{{ 'search.placeholder'|trans }}">
+    </form>
+    <div class="hicons">
+        <span class="rating">{{ ui.stars(4.8) }} <span>{{ 'header.verified'|trans }}</span></span>
+        <a href="{{ path('cart') }}" class="iconbtn" aria-label="{{ 'cart.aria'|trans({'%n%': 2}) }}">
+            <span aria-hidden="true">🛒</span> {{ 'cart.title'|trans }}<span class="cart-count" aria-hidden="true">2</span>
+        </a>
+    </div>
+</div>
+
+<nav class="subnav" aria-label="{{ 'nav.categories'|trans }}"><ul class="wrap">
+    {% for c in view.menu %}
+        {% set active = category is defined and category.slug == c.slug %}
+        {% if c.children is empty %}
+            <li><a href="{{ path('category', {slug: c.slug}) }}"{{ active ? ' aria-current="page"' : '' }}>{{ c.name(loc) }}</a></li>
+        {% else %}
+            <li class="navp"{{ c.mega ? ' data-mega="1"' : '' }}>
+                <a href="{{ path('category', {slug: c.slug}) }}" aria-haspopup="true" aria-expanded="false"{{ active ? ' aria-current="page"' : '' }}>{{ c.name(loc) }} <span class="caret" aria-hidden="true">▾</span></a>
+                <div class="submenu"><div class="submenu-in">
+                    <a class="sm-all" href="{{ path('category', {slug: c.slug}) }}">{{ 'nav.all_in'|trans({'%cat%': c.name(loc)}) }} →</a>
+                    {% for k in c.children %}
+                        <a href="{{ path('category', {slug: k.slug}) }}">{{ k.name(loc) }}</a>
+                    {% endfor %}
+                </div></div>
+            </li>
+        {% endif %}
+    {% endfor %}
+    <li><a href="{{ path('category', {slug: view.menu[0].slug}) }}">{{ 'nav.configurator'|trans }}</a></li>
+    <li><a href="{{ path('category', {slug: view.menu[0].slug}) }}" class="sale">{{ 'nav.sale'|trans }}</a></li>
+</ul></nav></header>

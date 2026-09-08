@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+{% import '_macros/ui.html.twig' as ui %}
+{% set loc = app.request.locale %}
+{% block title %}{{ page.title(loc) }} — {{ store.name }}{% endblock %}
+{% block body %}
+<div class="wrap section"><div class="content-page">
+    {{ ui.crumb([{label: 'nav.home'|trans, href: path('home')}, {label: page.title(loc)}]) }}
+    <h1>{{ page.title(loc) }}</h1>
+    <div class="page-body">{{ page.body(loc)|raw }}</div>
+    {% if page.slug == 'kontakty' %}
+        <dl class="idcard">
+            <div><dt>{{ 'contact.operator'|trans }}</dt><dd>{{ legal.name }}</dd></div>
+            <div><dt>IČ</dt><dd>{{ legal.ico }}</dd></div>
+            <div><dt>{{ 'contact.address'|trans }}</dt><dd>{{ legal.address }}</dd></div>
+            <div><dt>DPH</dt><dd>{{ 'legal.vat_nonpayer'|trans }}</dd></div>
+            <div><dt>{{ 'contact.sampling'|trans }}</dt><dd>{{ legal.samplingRoom }}</dd></div>
+            <div><dt>{{ 'footer.hours'|trans }}</dt><dd>Po–Pá 9:00–17:00</dd></div>
+            <div><dt>{{ 'form.phone'|trans }}</dt><dd>{{ store.phone }}</dd></div>
+            <div><dt>E-mail</dt><dd>{{ store.email }}</dd></div>
+        </dl>
+    {% endif %}
+</div></div>
+{% endblock %}

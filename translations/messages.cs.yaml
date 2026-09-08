@@ -1,0 +1,203 @@
+skip_to_content: Přeskočit na obsah
+all: Vše
+products: produktů
+reviews: hodnocení
+free: zdarma
+apply: Použít
+now: Nyní
+page_n: 'Strana %n%'
+page_next: Další strana
+breadcrumb: Drobečková navigace
+pagination: Stránkování
+filters: Filtry
+
+promo:
+  print: Tisk a expedice do 2 pracovních dnů
+  shipping: Zásilkovna od 59 Kč
+  returns: Vrácení do 14 dnů
+
+search:
+  label: Hledat v e-shopu
+  placeholder: 'Hledat motiv, povolání, jméno…'
+  results_for: Výsledky hledání pro
+
+header:
+  verified: '98 % · Heureka Ověřeno'
+
+nav:
+  home: Úvod
+  categories: Kategorie
+  all_in: 'Vše v %cat%'
+  configurator: Konfigurátor
+  sale: Výprodej
+
+cart:
+  title: Košík
+  aria: 'Košík, %n% položky'
+  summary: Souhrn
+  coupon: Slevový kód
+  subtotal: Mezisoučet
+  shipping_from: Doprava (od)
+  total: Celkem
+  to_checkout: Pokračovat k pokladně
+  remove: Odebrat
+  free_ship_hint: Přidejte za 141 Kč a máte dopravu Zásilkovnou zdarma.
+
+pay:
+  transfer: Bankovní převod
+  cod: Dobírka
+  card: Platební kartou (Comgate)
+
+ship:
+  packeta_point: Zásilkovna – výdejní místo
+  packeta_address: Zásilkovna – na adresu
+  post: Česká pošta / kurýr
+  pickup: Osobní odběr Praha 9
+
+footer:
+  about: Trička a dresy s potiskem na míru. Vlastní motivy, tisk v Praze, expedice do 2 dnů.
+  shopping: Nákup
+  how_to_buy: Jak nakupovat
+  delivery_payment: Doprava a platba
+  size_charts: Velikostní tabulky
+  returns: Reklamace a vrácení
+  info: Informace
+  terms: Obchodní podmínky
+  complaints: Reklamační řád
+  privacy: Ochrana osobních údajů
+  cookies: Zásady cookies
+  withdrawal: Odstoupení od smlouvy
+  contact: Kontakt
+  hours: 'Po–Pá 9:00–17:00'
+
+legal:
+  vat_payer: plátce DPH
+  vat_nonpayer: neplátce DPH
+  prices_final: Ceny jsou konečné, nejsme plátci DPH.
+  supervision: 'Dozorovým orgánem je Česká obchodní inspekce (ČOI). Spotřebitel má právo na mimosoudní řešení sporu u ČOI a na odstoupení od smlouvy do 14 dnů bez udání důvodu.'
+
+home:
+  title: Trička s potiskem
+  meta: Přes 3 000 hotových motivů nebo vlastní návrh. Vyberte barvu a velikost, vytiskneme a pošleme do 2 dnů.
+  eyebrow: Vlastní potisk · tisk v Praze
+  headline: Trička s potiskem, co dávají smysl
+  lede: Přes 3 000 hotových motivů, nebo si nahrajte vlastní návrh. Vyberte barvu, velikost a máte hotovo — vytiskneme a pošleme do dvou dnů.
+  cta_browse: Prohlédnout trička
+  cta_how: Jak to funguje
+  bestsellers: Nejprodávanější
+  categories: Kategorie
+  how_it_works: Jak to funguje
+  step1_t: Vyberte motiv
+  step1_d: Z katalogu, nebo nahrajte vlastní obrázek do konfigurátoru.
+  step2_t: Barva a velikost
+  step2_d: Pánský, dámský i dětský střih, až 14 barev.
+  step3_t: Vytiskneme a pošleme
+  step3_d: Expedice do 2 dnů, Zásilkovna, pošta i osobní odběr v Praze.
+  reviews_lead: zákazníků nás doporučuje (Heureka Ověřeno zákazníky)
+  review1: Kvalitní tisk, tričko sedí a přišlo za dva dny. Doporučuji.
+  review2: Objednával jsem dresy pro celý tým, vše bez problému.
+  seo_h: 'Trička s potiskem od %store%'
+  seo_p1: Nabízíme široký sortiment triček s potiskem pro každou příležitost — narozeninová, vtipná, dámská, pánská i dětská. Trička realizujeme digitálním tiskem a termolisem, u větších odběrů sítotiskem.
+  seo_p2: Motiv potisku si můžete vybrat z katalogu nebo nahrát vlastní návrh. Tričko dodáme z našich zásob, k dispozici je až 14 barev a velikosti od dětských po 3XL.
+  seo_p3: Osobní odběr je možný v naší vzorkovně v Praze 9, U Elektry 650. Poradenství v oblasti potisku a výroby sportovního textilu poskytujeme telefonicky i e-mailem.
+
+category:
+  in_stock: skladem, expedice do 2 dnů
+  url_hint: 'URL stránkování'
+
+sort:
+  label: Řadit
+  bestsellers: Nejprodávanější
+  newest: Nejnovější
+  price_asc: Cena vzestupně
+  price_desc: Cena sestupně
+
+filter:
+  gender: Pohlaví
+  color: Barva
+  size: Velikost
+  price: Cena
+  max_price: Maximální cena
+
+product:
+  color: Barva
+  size: Velikost
+  sold_out: vyprodáno
+  of_5: z 5
+  price_note: cena konečná · nejsme plátci DPH
+  size_chart: Velikostní tabulka
+  add_to_cart: Přidat do košíku
+  in_stock: Skladem — odesíláme zítra
+  description: Popis
+  parameters: Parametry
+  same_motif: Stejný motiv v jiném střihu
+  faq: Časté dotazy
+  faq1_q: Jak dlouho trvá dodání?
+  faq1_a: Tričko tiskneme na zakázku, expedujeme do 2 pracovních dnů. Doručení Zásilkovnou pak obvykle další 1–2 dny.
+  faq2_q: Můžu poslat vlastní motiv?
+  faq2_a: Ano. Vlastní obrázek nahrajte v konfigurátoru, nebo pošlete e-mailem. Doporučené rozlišení je 300 DPI.
+  faq3_q: Jak vybrat velikost?
+  faq3_a: Řiďte se velikostní tabulkou u produktu. Trička mají klasický střih, doporučujeme vaši obvyklou velikost.
+  also_offer: Dále vám můžeme nabídnout
+
+param:
+  material: Materiál
+  weight: Gramáž
+  fit: Střih
+  print: Technologie potisku
+  print_val: digitální tisk (DTG)
+  care: Údržba
+  care_val: 'praní do 40 °C, nesušit v sušičce'
+
+qty:
+  label: Množství
+  less: Snížit množství
+  more: Zvýšit množství
+
+trust:
+  print: 'Tisk do 2 dnů'
+  returns: 'Vrácení 14 dní'
+  verified: 'Heureka Ověřeno'
+
+checkout:
+  title: Pokladna
+  step_delivery: Doprava a platba
+  payment: Platba
+  step_details: Kontaktní a fakturační údaje
+  step_review: Rekapitulace a dokončení
+  agree_terms: Odesláním objednávky souhlasím s
+  place_order: Závazně objednat
+  your_order: Vaše objednávka
+  items: 'položky, 3 ks'
+  shipping: Doprava
+
+form:
+  first_name: Jméno
+  last_name: Příjmení
+  phone: Telefon
+  company: Firma (nepovinné)
+  street: Ulice a č.p.
+  city: Město
+  zip: PSČ
+  diff_delivery: Dodací adresa je jiná než fakturační
+  gdpr: Souhlasím se zpracováním osobních údajů pro vyřízení objednávky.
+  newsletter: Chci dostávat novinky e-mailem (lze kdykoli odhlásit).
+
+done:
+  title: Děkujeme za objednávku
+  body: 'Objednávka č. %code% byla přijata. Potvrzení jsme poslali e-mailem.'
+  pay_card: Zaplatit kartou
+  step1: Zaplatíte online kartou nebo převodem (QR na faktuře).
+  step2: Vytiskneme motiv a připravíme zásilku — do 2 pracovních dnů.
+  step3: Pošleme Zásilkovnou, dostanete sledovací kód e-mailem a SMS.
+  back_home: Zpět na úvodní stranu
+
+contact:
+  operator: Provozovatel
+  address: Sídlo
+  sampling: Vzorkovna / osobní odběr
+
+error404:
+  title: Stránka nenalezena
+  body: Stránka na této adrese neexistuje nebo byla přesunuta.
+  home: Zpět na úvodní stranu

@@ -1,34 +1,24 @@
 <!DOCTYPE html>
-<html lang="{{ app.request.locale }}">
+<html lang="{{ app.request.locale == 'sk' ? 'sk' : 'cs' }}" data-store="{{ store.code }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}Eshop platforma{% endblock %}</title>
+    <title>{% block title %}{{ store.name }}{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}Trička a dresy s potiskem na míru.{% endblock %}">
+    <link rel="canonical" href="{% block canonical %}{{ app.request.uri }}{% endblock %}">
+    {% if store.partnerCode %}
+        <link rel="alternate" hreflang="{{ store.locale }}" href="{{ app.request.uri }}">
+    {% endif %}
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext y='14' font-size='14'%3E%F0%9F%91%95%3C/text%3E%3C/svg%3E">
-    {% block stylesheets %}
-        <style>
-            :root { color-scheme: light; }
-            body { margin: 0; background: #ffffff; color: #1c1a17;
-                   font: 15px/1.6 "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif; }
-            .wrap { max-width: 720px; margin: 0 auto; padding: 56px 20px; }
-            h1 { font-size: 26px; margin: 0 0 6px; letter-spacing: -.02em; }
-            .sub { color: #6a635b; margin: 0 0 32px; }
-            .card { border: 1px solid #e8e3da; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
-            .card h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em;
-                       color: #9c948a; margin: 0 0 12px; }
-            .kv { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; }
-            .kv span:first-child { color: #6a635b; }
-            .stores { display: grid; gap: 8px; }
-            .store { display: flex; align-items: center; gap: 10px; padding: 10px 12px;
-                     border: 1px solid #e8e3da; border-radius: 9px; text-decoration: none; color: inherit; }
-            .store.active { border-color: #2f6b4a; background: #e9f0eb; }
-            .badge { font: 500 11px "IBM Plex Mono", monospace; padding: 2px 6px;
-                     border: 1px solid #d7cfc1; border-radius: 5px; color: #6a635b; }
-            .ok { color: #2f7d3a; } .bad { color: #b23125; }
-        </style>
-    {% endblock %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    {{ importmap('app') }}
 </head>
 <body>
-    <div class="wrap">{% block body %}{% endblock %}</div>
+    <a href="#obsah" class="skip">{{ 'skip_to_content'|trans }}</a>
+    {% include '_partials/header.html.twig' %}
+    <main id="obsah" tabindex="-1">{% block body %}{% endblock %}</main>
+    {% include '_partials/footer.html.twig' %}
 </body>
 </html>

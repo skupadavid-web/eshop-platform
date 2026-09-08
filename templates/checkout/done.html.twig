@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+{% block title %}{{ 'done.title'|trans }} — {{ store.name }}{% endblock %}
+{% block body %}
+<div class="wrap"><div class="confirm">
+    <div class="check" aria-hidden="true">✓</div>
+    <h1>{{ 'done.title'|trans }}</h1>
+    <p class="lede" style="text-align:center">{{ 'done.body'|trans({'%code%': code}) }}</p>
+    <a class="btn btn-primary" href="{{ path('home') }}">{{ 'done.pay_card'|trans }}</a>
+    <div class="next-steps">
+        <div><b>1.</b> <span>{{ 'done.step1'|trans }}</span></div>
+        <div><b>2.</b> <span>{{ 'done.step2'|trans }}</span></div>
+        <div><b>3.</b> <span>{{ 'done.step3'|trans }}</span></div>
+    </div>
+    <a class="link" href="{{ path('home') }}">{{ 'done.back_home'|trans }}</a>
+</div></div>
+{% endblock %}

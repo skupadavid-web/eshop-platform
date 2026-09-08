@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+{% import '_macros/ui.html.twig' as ui %}
+{% set loc = app.request.locale %}
+{% block title %}{{ 'search.results_for'|trans }} „{{ query }}" — {{ store.name }}{% endblock %}
+{% block body %}
+<div class="wrap section-tight">
+    <h1>{{ 'search.results_for'|trans }} „{{ query }}"</h1>
+    <p style="color:var(--ink-muted);margin:6px 0 20px">{{ products|length }} {{ 'products'|trans }}</p>
+    <div class="catgrid">{% for p in products %}{{ ui.product_card(p, view, loc) }}{% endfor %}</div>
+</div>
+{% endblock %}

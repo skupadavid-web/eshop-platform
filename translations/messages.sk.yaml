@@ -1,0 +1,203 @@
+skip_to_content: Preskočiť na obsah
+all: Všetko
+products: produktov
+reviews: hodnotení
+free: zdarma
+apply: Použiť
+now: Teraz
+page_n: 'Strana %n%'
+page_next: Ďalšia strana
+breadcrumb: Omrvinková navigácia
+pagination: Stránkovanie
+filters: Filtre
+
+promo:
+  print: Tlač a expedícia do 2 pracovných dní
+  shipping: Packeta od 2,50 €
+  returns: Vrátenie do 14 dní
+
+search:
+  label: Hľadať v e-shope
+  placeholder: 'Hľadať motív, povolanie, meno…'
+  results_for: Výsledky hľadania pre
+
+header:
+  verified: '98 % · Heureka Overené'
+
+nav:
+  home: Úvod
+  categories: Kategórie
+  all_in: 'Všetko v %cat%'
+  configurator: Konfigurátor
+  sale: Výpredaj
+
+cart:
+  title: Košík
+  aria: 'Košík, %n% položky'
+  summary: Súhrn
+  coupon: Zľavový kód
+  subtotal: Medzisúčet
+  shipping_from: Doprava (od)
+  total: Spolu
+  to_checkout: Pokračovať k pokladni
+  remove: Odobrať
+  free_ship_hint: Pridajte za 6 € a máte dopravu Packetou zadarmo.
+
+pay:
+  transfer: Bankový prevod
+  cod: Dobierka
+  card: Platobnou kartou
+
+ship:
+  packeta_point: Packeta – výdajné miesto
+  packeta_address: Packeta – na adresu
+  post: Slovenská pošta / kuriér
+  pickup: Osobný odber Praha 9
+
+footer:
+  about: Tričká a dresy s potlačou na mieru. Vlastné motívy, tlač v Prahe, expedícia do 2 dní.
+  shopping: Nákup
+  how_to_buy: Ako nakupovať
+  delivery_payment: Doprava a platba
+  size_charts: Veľkostné tabuľky
+  returns: Reklamácie a vrátenie
+  info: Informácie
+  terms: Obchodné podmienky
+  complaints: Reklamačný poriadok
+  privacy: Ochrana osobných údajov
+  cookies: Zásady cookies
+  withdrawal: Odstúpenie od zmluvy
+  contact: Kontakt
+  hours: 'Po–Pi 9:00–17:00'
+
+legal:
+  vat_payer: platiteľ DPH
+  vat_nonpayer: neplatiteľ DPH
+  prices_final: Ceny sú konečné, nie sme platiteľmi DPH.
+  supervision: 'Dozorným orgánom je Slovenská obchodná inšpekcia (SOI). Spotrebiteľ má právo odstúpiť od zmluvy do 14 dní bez udania dôvodu.'
+
+home:
+  title: Tričká s potlačou
+  meta: Vyše 3 000 hotových motívov alebo vlastný návrh. Vyberte farbu a veľkosť, vytlačíme a pošleme do 2 dní.
+  eyebrow: Vlastná potlač · tlač v Prahe
+  headline: Tričká s potlačou, ktoré dávajú zmysel
+  lede: Vyše 3 000 hotových motívov, alebo nahrajte vlastný návrh. Vyberte farbu, veľkosť a je hotovo — vytlačíme a pošleme do dvoch dní.
+  cta_browse: Prezrieť tričká
+  cta_how: Ako to funguje
+  bestsellers: Najpredávanejšie
+  categories: Kategórie
+  how_it_works: Ako to funguje
+  step1_t: Vyberte motív
+  step1_d: Z katalógu, alebo nahrajte vlastný obrázok.
+  step2_t: Farba a veľkosť
+  step2_d: Pánsky, dámsky aj detský strih, až 14 farieb.
+  step3_t: Vytlačíme a pošleme
+  step3_d: Expedícia do 2 dní, Packeta aj osobný odber.
+  reviews_lead: zákazníkov nás odporúča (Heureka Overené zákazníkmi)
+  review1: Kvalitná tlač, tričko sedí a prišlo za dva dni.
+  review2: Objednával som dresy pre celý tím, všetko bez problému.
+  seo_h: 'Tričká s potlačou'
+  seo_p1: Ponúkame široký sortiment tričiek s potlačou pre každú príležitosť — narodeninové, vtipné, dámske, pánske aj detské.
+  seo_p2: Motív potlače si môžete vybrať z katalógu alebo nahrať vlastný návrh.
+  seo_p3: Osobný odber je možný v našej vzorkovni.
+
+category:
+  in_stock: skladom, expedícia do 2 dní
+  url_hint: 'URL stránkovania'
+
+sort:
+  label: Zoradiť
+  bestsellers: Najpredávanejšie
+  newest: Najnovšie
+  price_asc: Cena vzostupne
+  price_desc: Cena zostupne
+
+filter:
+  gender: Pohlavie
+  color: Farba
+  size: Veľkosť
+  price: Cena
+  max_price: Maximálna cena
+
+product:
+  color: Farba
+  size: Veľkosť
+  sold_out: vypredané
+  of_5: z 5
+  price_note: cena konečná · nie sme platitelia DPH
+  size_chart: Veľkostná tabuľka
+  add_to_cart: Pridať do košíka
+  in_stock: Skladom — odosielame zajtra
+  description: Popis
+  parameters: Parametre
+  same_motif: Rovnaký motív v inom strihu
+  faq: Časté otázky
+  faq1_q: Ako dlho trvá dodanie?
+  faq1_a: Tričko tlačíme na zákazku, expedujeme do 2 pracovných dní.
+  faq2_q: Môžem poslať vlastný motív?
+  faq2_a: Áno. Vlastný obrázok nahrajte v konfigurátore alebo pošlite e-mailom.
+  faq3_q: Ako vybrať veľkosť?
+  faq3_a: Riaďte sa veľkostnou tabuľkou pri produkte.
+  also_offer: Ďalej vám môžeme ponúknuť
+
+param:
+  material: Materiál
+  weight: Gramáž
+  fit: Strih
+  print: Technológia potlače
+  print_val: digitálna tlač (DTG)
+  care: Údržba
+  care_val: 'pranie do 40 °C'
+
+qty:
+  label: Množstvo
+  less: Znížiť množstvo
+  more: Zvýšiť množstvo
+
+trust:
+  print: 'Tlač do 2 dní'
+  returns: 'Vrátenie 14 dní'
+  verified: 'Heureka Overené'
+
+checkout:
+  title: Pokladňa
+  step_delivery: Doprava a platba
+  payment: Platba
+  step_details: Kontaktné a fakturačné údaje
+  step_review: Rekapitulácia a dokončenie
+  agree_terms: Odoslaním objednávky súhlasím s
+  place_order: Záväzne objednať
+  your_order: Vaša objednávka
+  items: 'položky, 3 ks'
+  shipping: Doprava
+
+form:
+  first_name: Meno
+  last_name: Priezvisko
+  phone: Telefón
+  company: Firma (nepovinné)
+  street: Ulica a č. d.
+  city: Mesto
+  zip: PSČ
+  diff_delivery: Dodacia adresa je iná ako fakturačná
+  gdpr: Súhlasím so spracovaním osobných údajov pre vybavenie objednávky.
+  newsletter: Chcem dostávať novinky e-mailom.
+
+done:
+  title: Ďakujeme za objednávku
+  body: 'Objednávka č. %code% bola prijatá. Potvrdenie sme poslali e-mailom.'
+  pay_card: Zaplatiť kartou
+  step1: Zaplatíte online kartou alebo prevodom (QR na faktúre).
+  step2: Vytlačíme motív a pripravíme zásielku — do 2 pracovných dní.
+  step3: Pošleme Packetou, dostanete sledovací kód e-mailom a SMS.
+  back_home: Späť na úvod
+
+contact:
+  operator: Prevádzkovateľ
+  address: Sídlo
+  sampling: Vzorkovňa / osobný odber
+
+error404:
+  title: Stránka nenájdená
+  body: Stránka na tejto adrese neexistuje alebo bola presunutá.
+  home: Späť na úvod

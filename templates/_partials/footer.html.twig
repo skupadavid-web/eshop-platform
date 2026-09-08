@@ -1,0 +1,43 @@
+{% set loc = app.request.locale %}
+<footer class="sfoot"><div class="wrap">
+    <div class="sfoot-cols">
+        <div>
+            <h4>{{ store.name }}</h4>
+            <p class="lede" style="font-size:14px">{{ 'footer.about'|trans }}</p>
+            <div class="paylogos" style="margin-top:14px">
+                <span>Visa</span><span>Mastercard</span><span>Apple Pay</span><span>Google Pay</span>
+                <span>{{ 'pay.transfer'|trans }}</span><span>{{ 'pay.cod'|trans }}</span>
+            </div>
+        </div>
+        <div><h4>{{ 'footer.shopping'|trans }}</h4><ul>
+            <li><a href="{{ path('page', {slug: 'jak-nakupovat'}) }}">{{ 'footer.how_to_buy'|trans }}</a></li>
+            <li><a href="{{ path('page', {slug: 'jak-nakupovat'}) }}">{{ 'footer.delivery_payment'|trans }}</a></li>
+            <li><a href="{{ path('page', {slug: 'jak-nakupovat'}) }}">{{ 'footer.size_charts'|trans }}</a></li>
+            <li><a href="{{ path('page', {slug: 'obchodni-podminky'}) }}">{{ 'footer.returns'|trans }}</a></li>
+        </ul></div>
+        <div><h4>{{ 'footer.info'|trans }}</h4><ul>
+            <li><a href="{{ path('page', {slug: 'obchodni-podminky'}) }}">{{ 'footer.terms'|trans }}</a></li>
+            <li><a href="{{ path('page', {slug: 'obchodni-podminky'}) }}">{{ 'footer.complaints'|trans }}</a></li>
+            <li><a href="{{ path('page', {slug: 'obchodni-podminky'}) }}">{{ 'footer.privacy'|trans }}</a></li>
+            <li><a href="{{ path('page', {slug: 'obchodni-podminky'}) }}">{{ 'footer.cookies'|trans }}</a></li>
+            <li><a href="{{ path('page', {slug: 'obchodni-podminky'}) }}">{{ 'footer.withdrawal'|trans }}</a></li>
+        </ul></div>
+        <div><h4>{{ 'footer.contact'|trans }}</h4><ul>
+            <li>{{ legal.name }}</li>
+            <li>{{ legal.samplingRoom }}</li>
+            <li>{{ store.phone }}</li>
+            <li>{{ store.email }}</li>
+            <li>{{ 'footer.hours'|trans }}</li>
+        </ul></div>
+    </div>
+    <div class="legal">
+        <div class="idrow">
+            <span><b>{{ legal.name }}</b></span>
+            <span>IČ {{ legal.ico }}</span>
+            <span>{{ legal.vatPayer ? ('legal.vat_payer'|trans) : ('legal.vat_nonpayer'|trans) }}</span>
+            <span>{{ legal.address }}</span>
+        </div>
+        <div>{{ 'legal.supervision'|trans }}</div>
+        <div>© {{ 'now'|date('Y') }} {{ store.host }} · {{ 'legal.prices_final'|trans }}</div>
+    </div>
+</div></footer>
