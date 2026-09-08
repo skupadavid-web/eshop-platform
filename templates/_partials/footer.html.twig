@@ -9,19 +9,13 @@
                 <span>{{ 'pay.transfer'|trans }}</span><span>{{ 'pay.cod'|trans }}</span>
             </div>
         </div>
-        <div><h4>{{ 'footer.shopping'|trans }}</h4><ul>
-            <li><a href="{{ path('page', {slug: 'jak-nakupovat'}) }}">{{ 'footer.how_to_buy'|trans }}</a></li>
-            <li><a href="{{ path('page', {slug: 'jak-nakupovat'}) }}">{{ 'footer.delivery_payment'|trans }}</a></li>
-            <li><a href="{{ path('page', {slug: 'jak-nakupovat'}) }}">{{ 'footer.size_charts'|trans }}</a></li>
-            <li><a href="{{ path('page', {slug: 'obchodni-podminky'}) }}">{{ 'footer.returns'|trans }}</a></li>
-        </ul></div>
+        {% if view.pages is not empty %}
         <div><h4>{{ 'footer.info'|trans }}</h4><ul>
-            <li><a href="{{ path('page', {slug: 'obchodni-podminky'}) }}">{{ 'footer.terms'|trans }}</a></li>
-            <li><a href="{{ path('page', {slug: 'obchodni-podminky'}) }}">{{ 'footer.complaints'|trans }}</a></li>
-            <li><a href="{{ path('page', {slug: 'obchodni-podminky'}) }}">{{ 'footer.privacy'|trans }}</a></li>
-            <li><a href="{{ path('page', {slug: 'obchodni-podminky'}) }}">{{ 'footer.cookies'|trans }}</a></li>
-            <li><a href="{{ path('page', {slug: 'obchodni-podminky'}) }}">{{ 'footer.withdrawal'|trans }}</a></li>
+            {% for p in view.pages %}
+                <li><a href="{{ p.path }}">{{ p.title }}</a></li>
+            {% endfor %}
         </ul></div>
+        {% endif %}
         <div><h4>{{ 'footer.contact'|trans }}</h4><ul>
             <li>{{ legal.name }}</li>
             <li>{{ legal.samplingRoom }}</li>

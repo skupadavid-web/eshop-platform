@@ -1,66 +1,9 @@
 {% extends 'base.html.twig' %}
-{% set loc = app.request.locale %}
-{% set ship = store.currency == 'EUR' ? 2.5 : 59 %}
 {% block title %}{{ 'checkout.title'|trans }} — {{ store.name }}{% endblock %}
 {% block body %}
 <div class="wrap section-tight">
     <h1 style="margin-bottom:20px">{{ 'checkout.title'|trans }}</h1>
-    <div class="co-layout">
-        <div>
-            <div class="co-step"><h3><span class="n">1</span>{{ 'checkout.step_delivery'|trans }}</h3><div class="co-body">
-                <div class="opt-cards" style="margin-bottom:18px">
-                    {% for o in [
-                        {t: 'ship.packeta_point'|trans, p: ship|money, sel: true},
-                        {t: 'ship.packeta_address'|trans, p: (store.currency == 'EUR' ? 3.5 : 79)|money, sel: false},
-                        {t: 'ship.post'|trans, p: (store.currency == 'EUR' ? 3.9 : 89)|money, sel: false},
-                        {t: 'ship.pickup'|trans, p: 'free'|trans, sel: false}
-                    ] %}
-                        <button type="button" class="opt" aria-pressed="{{ o.sel ? 'true' : 'false' }}"><span class="r" aria-hidden="true"></span><span>{{ o.t }}</span><span class="oprice">{{ o.p }}</span></button>
-                    {% endfor %}
-                </div>
-                <h4 style="font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint);margin-bottom:10px">{{ 'checkout.payment'|trans }}</h4>
-                <div class="opt-cards">
-                    {% for o in [
-                        {t: 'pay.card'|trans, sel: true}, {t: 'Google Pay / Apple Pay', sel: false},
-                        {t: 'pay.transfer'|trans, sel: false}, {t: 'pay.cod'|trans, sel: false}
-                    ] %}
-                        <button type="button" class="opt" aria-pressed="{{ o.sel ? 'true' : 'false' }}"><span class="r" aria-hidden="true"></span><span>{{ o.t }}</span><span class="oprice">{{ 'free'|trans }}</span></button>
-                    {% endfor %}
-                </div>
-            </div></div>
-
-            <div class="co-step"><h3><span class="n">2</span>{{ 'checkout.step_details'|trans }}</h3><div class="co-body">
-                <div class="formgrid">
-                    <label class="field full"><span>E-mail</span><input type="email" value="jana.novakova@email.cz"></label>
-                    <label class="field"><span>{{ 'form.first_name'|trans }}</span><input value="Jana"></label>
-                    <label class="field"><span>{{ 'form.last_name'|trans }}</span><input value="Nováková"></label>
-                    <label class="field"><span>{{ 'form.phone'|trans }}</span><input value="+420 605 123 456"></label>
-                    <label class="field"><span>{{ 'form.company'|trans }}</span><input value=""></label>
-                    <label class="field full"><span>{{ 'form.street'|trans }}</span><input value="Květná 1180/4"></label>
-                    <label class="field"><span>{{ 'form.city'|trans }}</span><input value="Praha"></label>
-                    <label class="field"><span>{{ 'form.zip'|trans }}</span><input value="130 00"></label>
-                </div>
-                <label class="consent"><input type="checkbox"> {{ 'form.diff_delivery'|trans }}</label>
-                <label class="consent"><input type="checkbox" checked> {{ 'form.gdpr'|trans }}</label>
-                <label class="consent"><input type="checkbox"> {{ 'form.newsletter'|trans }}</label>
-            </div></div>
-
-            <div class="co-step"><h3><span class="n">3</span>{{ 'checkout.step_review'|trans }}</h3><div class="co-body">
-                <table class="spec-table" style="margin-bottom:14px">
-                    <tr><td>{{ view.products[0].name(loc) }} · {{ view.colors['zelena'].name(loc) }} / M · 1×</td><td style="text-align:right">{{ view.products[0].priceFor(loc)|money }}</td></tr>
-                    <tr><td>{{ 'ship.packeta_point'|trans }}</td><td style="text-align:right">{{ ship|money }}</td></tr>
-                </table>
-                <label class="consent"><input type="checkbox"> {{ 'checkout.agree_terms'|trans }} <a class="link" href="{{ path('page', {slug: 'obchodni-podminky'}) }}">{{ 'footer.terms'|trans|lower }}</a>.</label>
-                <a href="{{ path('checkout_done') }}" class="btn btn-primary btn-lg" style="margin-top:16px">{{ 'checkout.place_order'|trans }}</a>
-            </div></div>
-        </div>
-        <aside class="summary">
-            <h3 style="margin-bottom:10px">{{ 'checkout.your_order'|trans }}</h3>
-            <div class="row"><span>2 {{ 'checkout.items'|trans }}</span><span class="num">{{ (view.products[0].priceFor(loc) + view.products[1].priceFor(loc) * 2)|money }}</span></div>
-            <div class="row"><span>{{ 'checkout.shipping'|trans }}</span><span class="num">{{ ship|money }}</span></div>
-            <div class="row total"><span>{{ 'cart.total'|trans }}</span><span class="num">{{ (view.products[0].priceFor(loc) + view.products[1].priceFor(loc) * 2 + ship)|money }}</span></div>
-            <p style="font-size:12px;color:var(--ink-faint);margin-top:10px">{{ 'legal.prices_final'|trans }} {{ legal.name }}, IČ {{ legal.ico }}.</p>
-        </aside>
-    </div>
+    <p style="color:var(--ink-muted);padding:24px 0">{{ 'cart.empty'|trans }}</p>
+    <a href="{{ path('home') }}" class="btn btn-primary">{{ 'cart.continue_shopping'|trans }}</a>
 </div>
 {% endblock %}

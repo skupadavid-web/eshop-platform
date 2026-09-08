@@ -1,35 +1,37 @@
 {% macro stars(r) %}<span class="stars" aria-hidden="true">{% for i in 1..5 %}{{ i <= r|round ? '★' : '☆' }}{% endfor %}</span>{% endmacro %}
 
-{% macro product_card(p, view, loc) %}
-    {% set c0 = view.colors[p.colorKeys[0]] %}
-    <a class="pcard" href="{{ path('product', {slug: p.slug}) }}">
-        <div class="shirt-tile">{{ shirt(c0.hex, p.motif, p.name(loc) ~ ', ' ~ c0.name(loc)) }}</div>
-        <div><div class="ptitle">{{ p.name(loc) }}</div><div class="psub">{{ p.subtitle(loc) }}</div></div>
+{% macro product_card(p) %}
+    {% set c0 = p.primaryColor %}
+    <a class="pcard" href="{{ p.path }}">
+        <div class="shirt-tile">{{ shirt(c0 ? c0.hex : '#0b5fa5', p.motif, p.name ~ (c0 ? ', ' ~ c0.name : '')) }}</div>
+        <div><div class="ptitle">{{ p.name }}</div>{% if p.subtitle %}<div class="psub">{{ p.subtitle }}</div>{% endif %}</div>
         <div class="pfoot">
-            <span class="pprice">{{ p.priceFor(loc)|money }}</span>
+            <span class="pprice">{{ p.price|money }}</span>
+            {% if p.colors|length > 1 %}
             <span class="pdots" aria-hidden="true">
-                {% for k in p.colorKeys|slice(0, 5) %}<i style="background:{{ view.colors[k].hex }}"></i>{% endfor %}
-                {% if p.colorKeys|length > 5 %}<i style="background:var(--surface-3)"></i>{% endif %}
+                {% for col in p.colors|slice(0, 5) %}<i style="background:{{ col.hex }}"></i>{% endfor %}
+                {% if p.colors|length > 5 %}<i style="background:var(--surface-3)"></i>{% endif %}
             </span>
+            {% endif %}
         </div>
+        {% if p.rating %}
         <div class="rating">{{ _self.stars(p.rating) }} <span>{{ p.rating|number_format(1, ',') }} ({{ p.reviews }} {{ 'reviews'|trans }})</span></div>
+        {% endif %}
     </a>
 {% endmacro %}
 
-{% macro swatch_row(p, view, loc, selected) %}
+{% macro swatch_row(product) %}
     <div class="swatchrow" role="group" aria-label="{{ 'product.color'|trans }}">
-        {% for k in p.colorKeys %}
-            {% set col = view.colors[k] %}
-            <button type="button" class="swatch" aria-pressed="{{ k == selected ? 'true' : 'false' }}" aria-label="{{ col.name(loc) }}" style="background:{{ col.hex }}"></button>
+        {% for col in product.colors %}
+            <a class="swatch" href="{{ col.path }}" aria-pressed="{{ col.variantId == product.variantId ? 'true' : 'false' }}" aria-label="{{ col.name }}" style="background:{{ col.hex }}"></a>
         {% endfor %}
     </div>
 {% endmacro %}
 
-{% macro size_row(p, loc) %}
+{% macro size_row(product) %}
     <div class="sizerow" role="group" aria-label="{{ 'product.size'|trans }}">
-        {% for s in p.sizes %}
-            {% set out = s in p.soldOutSizes %}
-            <button type="button" class="sizechip" aria-pressed="{{ loop.index == 3 and not out ? 'true' : 'false' }}"{{ out ? ' disabled aria-label="' ~ s ~ ' – ' ~ ('product.sold_out'|trans) ~ '"' : '' }}>{{ s }}</button>
+        {% for s in product.sizes %}
+            <button type="button" class="sizechip" data-size-id="{{ s.variantSizeId }}" aria-pressed="{{ loop.first ? 'true' : 'false' }}"{{ s.available ? '' : ' disabled aria-label="' ~ s.label ~ ' – ' ~ ('product.sold_out'|trans) ~ '"' }}>{{ s.label }}</button>
         {% endfor %}
     </div>
 {% endmacro %}

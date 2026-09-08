@@ -7,6 +7,7 @@ apply: Použít
 now: Nyní
 page_n: 'Strana %n%'
 page_next: Další strana
+page_prev: Předchozí strana
 breadcrumb: Drobečková navigace
 pagination: Stránkování
 filters: Filtry
@@ -20,6 +21,7 @@ search:
   label: Hledat v e-shopu
   placeholder: 'Hledat motiv, povolání, jméno…'
   results_for: Výsledky hledání pro
+  no_results: Nic jsme nenašli. Zkuste jiná slova.
 
 header:
   verified: '98 % · Heureka Ověřeno'
@@ -34,6 +36,8 @@ nav:
 cart:
   title: Košík
   aria: 'Košík, %n% položky'
+  empty: Košík je zatím prázdný.
+  continue_shopping: Pokračovat v nákupu
   summary: Souhrn
   coupon: Slevový kód
   subtotal: Mezisoučet
@@ -104,6 +108,7 @@ home:
 category:
   in_stock: skladem, expedice do 2 dnů
   url_hint: 'URL stránkování'
+  empty: V této kategorii zatím nejsou žádné produkty.
 
 sort:
   label: Řadit
@@ -144,6 +149,7 @@ param:
   material: Materiál
   weight: Gramáž
   fit: Střih
+  manufacturer: Výrobce
   print: Technologie potisku
   print_val: digitální tisk (DTG)
   care: Údržba

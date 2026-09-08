@@ -1,11 +1,21 @@
 {% extends 'base.html.twig' %}
 {% import '_macros/ui.html.twig' as ui %}
-{% set loc = app.request.locale %}
 {% block title %}{{ 'search.results_for'|trans }} „{{ query }}" — {{ store.name }}{% endblock %}
 {% block body %}
 <div class="wrap section-tight">
     <h1>{{ 'search.results_for'|trans }} „{{ query }}"</h1>
-    <p style="color:var(--ink-muted);margin:6px 0 20px">{{ products|length }} {{ 'products'|trans }}</p>
-    <div class="catgrid">{% for p in products %}{{ ui.product_card(p, view, loc) }}{% endfor %}</div>
+    <p style="color:var(--ink-muted);margin:6px 0 20px">{{ total }} {{ 'products'|trans }}</p>
+    {% if products is empty %}
+        <p style="color:var(--ink-muted);padding:24px 0">{{ 'search.no_results'|trans }}</p>
+    {% else %}
+        <div class="catgrid">{% for p in products %}{{ ui.product_card(p) }}{% endfor %}</div>
+    {% endif %}
+    {% if pages > 1 %}
+    <nav class="pager" aria-label="{{ 'pagination'|trans }}">
+        {% for n in 1..pages %}
+            <a href="{{ path('search', {q: query, page: n}) }}"{{ n == page ? ' class="on" aria-current="page"' : '' }}>{{ n }}</a>
+        {% endfor %}
+    </nav>
+    {% endif %}
 </div>
 {% endblock %}

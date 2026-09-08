@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Twig;
 
+use App\Catalog\Catalog;
 use App\Catalog\LegalEntity;
-use App\Sample\SampleData;
 use App\Store\StoreContext;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -13,8 +13,8 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Twig\Environment;
 
 /**
- * Makes the active store, the seller identity and the (phase-1 sample) catalogue
- * slice available to every template as {{ store }}, {{ legal }} and {{ view }}.
+ * Makes the active store, the seller identity and the store-wide catalogue
+ * navigation available to every template as {{ store }}, {{ legal }}, {{ view }}.
  * Runs after StoreResolverSubscriber has populated the store context.
  */
 #[AsEventListener(event: KernelEvents::REQUEST, priority: 8)]
@@ -24,7 +24,7 @@ final readonly class StorefrontGlobals
         private Environment $twig,
         private StoreContext $storeContext,
         private LegalEntity $legal,
-        private SampleData $sample,
+        private Catalog $catalog,
     ) {
     }
 
@@ -37,6 +37,6 @@ final readonly class StorefrontGlobals
         $store = $this->storeContext->get();
         $this->twig->addGlobal('store', $store);
         $this->twig->addGlobal('legal', $this->legal);
-        $this->twig->addGlobal('view', $this->sample->forStore($store->code));
+        $this->twig->addGlobal('view', $this->catalog->storefront($store));
     }
 }

@@ -1,68 +1,54 @@
 {% extends 'base.html.twig' %}
 {% import '_macros/ui.html.twig' as ui %}
-{% set loc = app.request.locale %}
-{% block title %}{{ category.name(loc) }} — {{ store.name }}{% endblock %}
+{% set active_category_id = cat.categoryId %}
+{% block title %}{{ cat.name }}{{ cat.page > 1 ? ' – ' ~ ('page_n'|trans({'%n%': cat.page})) : '' }} — {{ store.name }}{% endblock %}
+{% block meta_description %}{{ cat.metaDescription ?: (cat.bodyHtml ? cat.bodyHtml|striptags|slice(0, 155) : cat.name) }}{% endblock %}
+{% block canonical %}{{ app.request.schemeAndHttpHost }}{{ cat.pagePath(cat.page) }}{% endblock %}
 {% block body %}
 <div class="wrap">
     {{ ui.crumb(
         [{label: 'nav.home'|trans, href: path('home')}]
-        |merge(parent ? [{label: parent.name(loc), href: path('category', {slug: parent.slug})}] : [])
-        |merge([{label: category.name(loc)}])
+        |merge(cat.crumbs|map(c => {label: c.name, href: c.path}))
+        |merge([{label: cat.name}])
     ) }}
 
     <div class="cat-head">
         <div>
-            <h1>{{ category.name(loc) }}</h1>
-            <p style="color:var(--ink-muted);font-size:14px;margin-top:4px">{{ category.count }} {{ 'products'|trans }} · {{ 'category.in_stock'|trans }}</p>
-        </div>
-        <label class="cluster" style="gap:8px;font-size:14px">{{ 'sort.label'|trans }}
-            <select class="sortsel">
-                <option>{{ 'sort.bestsellers'|trans }}</option>
-                <option>{{ 'sort.newest'|trans }}</option>
-                <option>{{ 'sort.price_asc'|trans }}</option>
-                <option>{{ 'sort.price_desc'|trans }}</option>
-            </select>
-        </label>
-    </div>
-
-    <div class="cat-layout">
-        <aside class="filters" aria-label="{{ 'filters'|trans }}">
-            <div class="fgroup"><h4>{{ 'filter.gender'|trans }}</h4>
-                {% for g in ['Pánské','Dámské','Dětské','Unisex'] %}
-                    <label class="chk"><input type="checkbox"{{ loop.index == 2 ? ' checked' : '' }}> {{ g }}</label>
-                {% endfor %}
-            </div>
-            <div class="fgroup"><h4 id="fBarva">{{ 'filter.color'|trans }}</h4>
-                <div class="swatchrow" role="group" aria-labelledby="fBarva">
-                    {% for k, col in view.colors|slice(0, 10) %}
-                        <button type="button" class="swatch" aria-pressed="false" aria-label="{{ col.name(loc) }}" style="background:{{ col.hex }}"></button>
-                    {% endfor %}
-                </div>
-            </div>
-            <div class="fgroup"><h4 id="fVel">{{ 'filter.size'|trans }}</h4>
-                <div class="sizerow" role="group" aria-labelledby="fVel">
-                    {% for s in ['XS','S','M','L','XL','XXL','XXXL'] %}
-                        <button type="button" class="sizechip" aria-pressed="{{ loop.index == 3 ? 'true' : 'false' }}">{{ s }}</button>
-                    {% endfor %}
-                </div>
-            </div>
-            <div class="fgroup"><h4>{{ 'filter.price'|trans }}</h4>
-                <input type="range" min="0" max="100" value="60" aria-label="{{ 'filter.max_price'|trans }}" style="width:100%;accent-color:var(--accent)">
-                <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--ink-muted)"><span>0</span><span>{{ 700|money }}</span></div>
-            </div>
-        </aside>
-
-        <div>
-            <div class="catgrid">{% for p in products %}{{ ui.product_card(p, view, loc) }}{% endfor %}</div>
-            <nav class="pager" aria-label="{{ 'pagination'|trans }}">
-                <span aria-hidden="true" style="opacity:.4">‹</span>
-                <a class="on" aria-current="page" href="{{ path('category', {slug: category.slug}) }}">1</a>
-                <a href="{{ path('category', {slug: category.slug}) }}" aria-label="{{ 'page_n'|trans({'%n%': 2}) }}">2</a>
-                <a href="{{ path('category', {slug: category.slug}) }}" aria-label="{{ 'page_n'|trans({'%n%': 3}) }}">3</a>
-                <a href="{{ path('category', {slug: category.slug}) }}" aria-label="{{ 'page_next'|trans }}">›</a>
-            </nav>
-            <div class="urlhint">{{ 'category.url_hint'|trans }}: {{ store.host }}/{{ category.slug }}/stranka-2</div>
+            <h1>{{ cat.name }}</h1>
+            {% if cat.total %}<p style="color:var(--ink-muted);font-size:14px;margin-top:4px">{{ cat.total }} {{ 'products'|trans }}</p>{% endif %}
         </div>
     </div>
+
+    {% if cat.subcategories is not empty %}
+    <nav class="subcats" aria-label="{{ 'nav.categories'|trans }}" style="display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 18px">
+        {% for s in cat.subcategories %}<a class="sizechip" href="{{ s.path }}">{{ s.name }}</a>{% endfor %}
+    </nav>
+    {% endif %}
+
+    {% if cat.products is empty %}
+        <p style="color:var(--ink-muted);padding:32px 0">{{ 'category.empty'|trans }}</p>
+    {% else %}
+        <div class="catgrid">{% for p in cat.products %}{{ ui.product_card(p) }}{% endfor %}</div>
+    {% endif %}
+
+    {% if cat.pages > 1 %}
+    <nav class="pager" aria-label="{{ 'pagination'|trans }}">
+        {% if cat.hasPrev %}<a href="{{ cat.pagePath(cat.page - 1) }}" aria-label="{{ 'page_prev'|trans }}">‹</a>{% else %}<span aria-hidden="true" style="opacity:.4">‹</span>{% endif %}
+        {% for n in 1..cat.pages %}
+            {% if n == cat.page %}
+                <a class="on" aria-current="page" href="{{ cat.pagePath(n) }}">{{ n }}</a>
+            {% elseif n <= 2 or n > cat.pages - 2 or (n >= cat.page - 1 and n <= cat.page + 1) %}
+                <a href="{{ cat.pagePath(n) }}" aria-label="{{ 'page_n'|trans({'%n%': n}) }}">{{ n }}</a>
+            {% elseif n == 3 or n == cat.pages - 2 %}
+                <span aria-hidden="true">…</span>
+            {% endif %}
+        {% endfor %}
+        {% if cat.hasNext %}<a href="{{ cat.pagePath(cat.page + 1) }}" aria-label="{{ 'page_next'|trans }}">›</a>{% else %}<span aria-hidden="true" style="opacity:.4">›</span>{% endif %}
+    </nav>
+    {% endif %}
+
+    {% if cat.bodyHtml and cat.page == 1 %}
+    <div class="seoblock" style="margin-top:32px">{{ cat.bodyHtml|raw }}</div>
+    {% endif %}
 </div>
 {% endblock %}

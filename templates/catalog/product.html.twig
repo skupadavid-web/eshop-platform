@@ -1,48 +1,57 @@
 {% extends 'base.html.twig' %}
 {% import '_macros/ui.html.twig' as ui %}
-{% set loc = app.request.locale %}
-{% set c0 = view.colors[product.colorKeys[0]] %}
-{% block title %}{{ product.name(loc) }} — {{ store.name }}{% endblock %}
-{% block meta_description %}{{ product.description(loc)|striptags|slice(0, 155) }}{% endblock %}
+{% set c0 = product.selectedColor %}
+{% block title %}{{ product.name }}{{ c0 ? ' – ' ~ c0.name : '' }} — {{ store.name }}{% endblock %}
+{% block meta_description %}{{ product.descriptionHtml ? product.descriptionHtml|striptags|slice(0, 155) : product.name }}{% endblock %}
+{% block canonical %}{{ app.request.schemeAndHttpHost }}{{ product.canonicalPath }}{% endblock %}
 {% block body %}
 <div class="wrap">
     {{ ui.crumb([
         {label: 'nav.home'|trans, href: path('home')},
-        {label: category ? category.name(loc) : 'Trička', href: path('category', {slug: product.categorySlug})},
-        {label: product.name(loc)}
+        {label: product.name}
     ]) }}
 
     <div class="pd">
         <div class="pd-gallery">
-            <div class="pd-main" id="pdMain">{{ shirt(c0.hex, product.motif, product.name(loc) ~ ', ' ~ c0.name(loc)) }}</div>
+            <div class="pd-main" id="pdMain">{{ shirt(c0.hex, product.motif, product.name ~ ', ' ~ c0.name) }}</div>
+            {% if product.colors|length > 1 %}
             <div class="pd-thumbs" role="group" aria-label="{{ 'product.color'|trans }}">
-                {% for k in product.colorKeys %}
-                    <button type="button" class="pd-thumb" aria-pressed="{{ loop.first ? 'true' : 'false' }}" aria-label="{{ 'product.color'|trans }} {{ view.colors[k].name(loc) }}">{{ shirt(view.colors[k].hex, product.motif) }}</button>
+                {% for col in product.colors %}
+                    <a class="pd-thumb" href="{{ col.path }}" aria-pressed="{{ col.variantId == product.variantId ? 'true' : 'false' }}" aria-label="{{ 'product.color'|trans }} {{ col.name }}">{{ shirt(col.hex, product.motif) }}</a>
                 {% endfor %}
             </div>
+            {% endif %}
         </div>
         <div class="pd-buy">
-            <h1>{{ product.name(loc) }}</h1>
-            <div class="sub">{{ product.subtitle(loc) }}</div>
-            <div class="rating" style="margin-top:8px">{{ ui.stars(product.rating) }} <span>{{ product.rating|number_format(1, ',') }} {{ 'product.of_5'|trans }} · {{ product.reviews }} {{ 'reviews'|trans }}</span></div>
-            <div class="price-line"><span class="price-big">{{ product.priceFor(loc)|money }}</span><span class="price-note">{{ 'product.price_note'|trans }}</span></div>
+            <h1>{{ product.name }}</h1>
+            {% if product.subtitle %}<div class="sub">{{ product.subtitle }}</div>{% endif %}
+            <div class="price-line">
+                <span class="price-big">{{ product.price|money }}</span>
+                {% if product.priceBeforeDiscount and product.priceBeforeDiscount > product.price %}
+                    <span class="price-note"><s>{{ product.priceBeforeDiscount|money }}</s></span>
+                {% endif %}
+                <span class="price-note">{{ 'product.price_note'|trans }}</span>
+            </div>
 
+            {% if product.colors|length > 1 %}
             <div class="buy-field">
-                <div class="flabel"><span id="pdColorLbl">{{ 'product.color'|trans }}</span><span class="val" id="pdColorName">{{ c0.name(loc) }}</span></div>
-                {{ ui.swatch_row(product, view, loc, product.colorKeys[0]) }}
+                <div class="flabel"><span id="pdColorLbl">{{ 'product.color'|trans }}</span><span class="val" id="pdColorName">{{ c0.name }}</span></div>
+                {{ ui.swatch_row(product) }}
             </div>
+            {% endif %}
+            {% if product.sizes is not empty %}
             <div class="buy-field">
-                <div class="flabel"><span id="pdSizeLbl">{{ 'product.size'|trans }}</span><a class="link" href="{{ path('page', {slug: 'jak-nakupovat'}) }}" style="font-weight:500;font-size:13px">{{ 'product.size_chart'|trans }}</a></div>
-                {{ ui.size_row(product, loc) }}
+                <div class="flabel"><span id="pdSizeLbl">{{ 'product.size'|trans }}</span></div>
+                {{ ui.size_row(product) }}
             </div>
+            {% endif %}
             <div class="buy-field">
                 <div class="flabel"><span>{{ 'qty.label'|trans }}</span></div>
                 {{ ui.qty() }}
             </div>
             <div class="buy-actions">
-                <button class="btn btn-primary btn-lg">{{ 'product.add_to_cart'|trans }} · {{ product.priceFor(loc)|money }}</button>
+                <button class="btn btn-primary btn-lg">{{ 'product.add_to_cart'|trans }} · {{ product.price|money }}</button>
             </div>
-            <div class="stock-ok"><span class="dot" style="width:8px;height:8px;background:currentColor;border-radius:50%"></span> {{ 'product.in_stock'|trans }}</div>
             <div class="delivery-mini">
                 <div><span>{{ 'ship.packeta_point'|trans }}</span><b>{{ (store.currency == 'EUR' ? 2.5 : 59)|money }}</b></div>
                 <div><span>{{ 'ship.post'|trans }}</span><b>{{ (store.currency == 'EUR' ? 3.9 : 89)|money }}</b></div>
@@ -51,43 +60,24 @@
             <div class="trust-row">
                 <span>✓ {{ 'trust.print'|trans }}</span>
                 <span>✓ {{ 'trust.returns'|trans }}</span>
-                <span>✓ {{ 'trust.verified'|trans }}</span>
             </div>
         </div>
     </div>
 
     <div class="pd-below">
-        <div><h2 style="margin-bottom:10px">{{ 'product.description'|trans }}</h2><p style="color:var(--ink-muted)">{{ product.description(loc) }}</p></div>
+        {% if product.descriptionHtml or product.descriptionExtendedHtml %}
+        <div><h2 style="margin-bottom:10px">{{ 'product.description'|trans }}</h2>
+            <div style="color:var(--ink-muted)">{{ product.descriptionHtml|raw }}{{ product.descriptionExtendedHtml|raw }}</div>
+        </div>
+        {% endif %}
         <div><h2 style="margin-bottom:10px">{{ 'product.parameters'|trans }}</h2>
             <table class="spec-table">
-                <tr><td>{{ 'param.material'|trans }}</td><td>{{ product.material }}</td></tr>
-                <tr><td>{{ 'param.weight'|trans }}</td><td>{{ product.gramaz }} g/m²</td></tr>
-                <tr><td>{{ 'param.fit'|trans }}</td><td>{{ product.gender }}</td></tr>
-                <tr><td>{{ 'param.print'|trans }}</td><td>{{ 'param.print_val'|trans }}</td></tr>
-                <tr><td>{{ 'param.care'|trans }}</td><td>{{ 'param.care_val'|trans }}</td></tr>
+                {% if product.material %}<tr><td>{{ 'param.material'|trans }}</td><td>{{ product.material }}</td></tr>{% endif %}
+                {% if product.weightGsm %}<tr><td>{{ 'param.weight'|trans }}</td><td>{{ product.weightGsm }} g/m²</td></tr>{% endif %}
+                {% if product.gender %}<tr><td>{{ 'param.fit'|trans }}</td><td>{{ product.gender }}</td></tr>{% endif %}
+                {% if product.printTechnology %}<tr><td>{{ 'param.print'|trans }}</td><td>{{ product.printTechnology }}</td></tr>{% endif %}
+                {% if product.manufacturer %}<tr><td>{{ 'param.manufacturer'|trans }}</td><td>{{ product.manufacturer }}</td></tr>{% endif %}
             </table>
-        </div>
-        <div><h2 style="margin-bottom:12px">{{ 'product.same_motif'|trans }}</h2>
-            <div class="variant-links">
-                {% for g in ['Pánské','Dámské','Dětské'] %}
-                    <a class="pcard" href="{{ path('product', {slug: product.slug}) }}">
-                        <div class="shirt-tile">{{ shirt(c0.hex, product.motif, g ~ ' ' ~ product.name(loc)) }}</div>
-                        <div class="ptitle">{{ g }} — {{ product.name(loc) }}</div>
-                        <span class="pprice">{{ product.priceFor(loc)|money }}</span>
-                    </a>
-                {% endfor %}
-            </div>
-        </div>
-        <div><h2 style="margin-bottom:12px">{{ 'product.faq'|trans }}</h2>
-            <div class="acc">
-                {% for i in 1..3 %}
-                    <details><summary>{{ ('product.faq' ~ i ~ '_q')|trans }}<span aria-hidden="true">+</span></summary>
-                        <div class="acc-body">{{ ('product.faq' ~ i ~ '_a')|trans }}</div></details>
-                {% endfor %}
-            </div>
-        </div>
-        <div><h2 style="margin-bottom:12px">{{ 'product.also_offer'|trans }}</h2>
-            <div class="pgrid" style="grid-template-columns:repeat(3,1fr)">{% for p in related %}{{ ui.product_card(p, view, loc) }}{% endfor %}</div>
         </div>
     </div>
 </div>

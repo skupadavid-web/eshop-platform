@@ -114,7 +114,9 @@ final class ProductStep implements MigrationStep
                 $vt = new VariantTranslation($variant, $locale);
                 $vt->name = $variant->color;
                 if (!empty($v['alias_varianta'])) {
-                    $vt->slug = Slug::fromLegacyAlias((string) $v['alias_varianta']);
+                    // keep the exact legacy path segment ("..._detail-1178-14775"); the old URLs
+                    // are indexed by Google and must resolve 1:1. A cleaner slug is a later concern.
+                    $vt->slug = mb_substr(Slug::legacyPath((string) $v['alias_varianta']), 0, 255);
                 }
                 $variant->translations->add($vt);
 

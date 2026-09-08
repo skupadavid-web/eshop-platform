@@ -4,43 +4,31 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Sample\SampleData;
-use App\Store\StoreContext;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+/**
+ * Cart & checkout shells. The real basket, order placement and payment land in E5;
+ * for now these render an empty-state so the storefront is navigable end to end.
+ */
 final class CheckoutController extends AbstractController
 {
-    public function __construct(
-        private readonly StoreContext $ctx,
-        private readonly SampleData $data,
-    ) {
-    }
-
-    #[Route('/kosik', name: 'cart')]
+    #[Route('/kosik', name: 'cart', priority: 10)]
     public function cart(): Response
     {
-        $view = $this->data->forStore($this->ctx->get()->code);
-        $items = [
-            ['product' => $view->products[0], 'color' => 'zelena', 'size' => 'M', 'qty' => 1],
-            ['product' => $view->products[1], 'color' => 'cerna', 'size' => 'L', 'qty' => 2],
-        ];
-
-        return $this->render('checkout/cart.html.twig', ['view' => $view, 'items' => $items]);
+        return $this->render('checkout/cart.html.twig');
     }
 
-    #[Route('/pokladna', name: 'checkout')]
+    #[Route('/pokladna', name: 'checkout', priority: 10)]
     public function checkout(): Response
     {
-        $view = $this->data->forStore($this->ctx->get()->code);
-
-        return $this->render('checkout/checkout.html.twig', ['view' => $view]);
+        return $this->render('checkout/checkout.html.twig');
     }
 
-    #[Route('/hotovo', name: 'checkout_done')]
+    #[Route('/hotovo', name: 'checkout_done', priority: 10)]
     public function done(): Response
     {
-        return $this->render('checkout/done.html.twig', ['code' => 'TSP-24218']);
+        return $this->render('checkout/done.html.twig', ['code' => null]);
     }
 }

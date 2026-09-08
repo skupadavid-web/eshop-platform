@@ -16,11 +16,19 @@ use App\Migration\MigrationReport;
 use App\Migration\Source;
 use Doctrine\ORM\EntityManagerInterface;
 
-/** Old {prefix}stranky -> Category (listing templates) or Page (content), + parent links. */
+/** Old {prefix}stranky -> Category (listing templates) or Page (content), + parent links + main-menu flag. */
 final class TaxonomyStep implements MigrationStep
 {
     /** Any old template whose name starts with this renders a product listing = a Category. */
     private const CATEGORY_TEMPLATE_PREFIX = 'vypis_zbozi';
+
+    /** Old templates that are checkout/account plumbing, not real content — skipped entirely. */
+    private const SYSTEM_TEMPLATES = [
+        'kosik.php', 'detail_zbozi.php', 'detail_zbozi_2.php', 'detail_zbozi_3.php',
+        'rekapitulace.php', 'rekapitulace_2.php', 'odeslani_objednavky.php', 'odeslani_objednavky_2.php',
+        'doprava_platba.php', 'doprava_platba_2.php', 'vyhledavani.php', 'registrace_uzivatele.php',
+        'editace_uzivatele.php', 'osobni_udaje.php', 'test_odeslani.php', 'kontrola_objednavky.php',
+    ];
 
     public function __construct(
         private readonly LegacyDb $db,
@@ -52,7 +60,7 @@ final class TaxonomyStep implements MigrationStep
         $locale = $source->locale();
 
         $rows = $this->db->all(sprintf(
-            'SELECT s.id, s.title, s.subtitle, s.alias, s.sablona, s.parent, s.poradi, s.publikace,
+            'SELECT s.id, s.title, s.subtitle, s.alias, s.sablona, s.parent, s.poradi, s.publikace, s.menu_stav,
                     o.text_stranky, o.keywords, o.description
              FROM %s s LEFT JOIN %s o ON o.id = s.id
              WHERE s.display_frontend = 1 AND (s.alias IS NOT NULL AND s.alias <> "")',
@@ -67,11 +75,14 @@ final class TaxonomyStep implements MigrationStep
         foreach ($rows as $r) {
             $oldId = (int) $r['id'];
             $sablona = (string) $r['sablona'];
-            $isCategory = str_starts_with($sablona, self::CATEGORY_TEMPLATE_PREFIX);
             $alias = ltrim((string) $r['alias'], '/');
-            if (str_contains($alias, '://')) {
-                continue; // home row stores a full URL
+            if (str_contains($alias, '://') || \in_array($sablona, self::SYSTEM_TEMPLATES, true)) {
+                $report->add('taxonomy.system_skipped');
+                continue;
             }
+            $isCategory = str_starts_with($sablona, self::CATEGORY_TEMPLATE_PREFIX);
+            $position = self::orderKey((string) $r['poradi']);
+            $inMenu = str_contains((string) ($r['menu_stav'] ?? ''), 'class=open');
 
             if ($isCategory) {
                 if (null !== $this->ids->get($source, 'category', $oldId)) {
@@ -80,8 +91,9 @@ final class TaxonomyStep implements MigrationStep
                 }
                 $cat = new Category($store);
                 $cat->legacyId = $oldId;
-                $cat->position = (int) $r['poradi'];
+                $cat->position = $position;
                 $cat->published = (bool) $r['publikace'];
+                $cat->showInMenu = $inMenu;
                 // keep the old listing template as a layout hint for E4 (vypis_zbozi_spec_8 -> "spec_8")
                 $layout = trim(str_replace(['vypis_zbozi', '.php'], '', $sablona), '_');
                 $cat->listingLayout = mb_substr('' === $layout ? 'grid' : $layout, 0, 40);
@@ -92,7 +104,7 @@ final class TaxonomyStep implements MigrationStep
                 $t->bodyHtml = $r['text_stranky'] ? (string) $r['text_stranky'] : null;
                 $cat->translations->add($t);
                 $created[$oldId] = $cat;
-                $report->add('taxonomy.category');
+                $report->add($inMenu ? 'taxonomy.category.menu' : 'taxonomy.category');
             } else {
                 if (null !== $this->ids->get($source, 'page', $oldId)) {
                     $report->add('taxonomy.page.skipped');
@@ -101,7 +113,7 @@ final class TaxonomyStep implements MigrationStep
                 $page = new Page($store);
                 $page->legacyId = $oldId;
                 $page->type = PageType::Content;
-                $page->position = (int) $r['poradi'];
+                $page->position = $position;
                 $page->published = (bool) $r['publikace'];
                 $t = new PageTranslation($page, $locale);
                 $t->title = mb_substr((string) $r['title'], 0, 255);
@@ -119,7 +131,7 @@ final class TaxonomyStep implements MigrationStep
             return;
         }
 
-        foreach ($created as $oldId => $node) {
+        foreach ($created as $node) {
             $this->em->persist($node);
         }
         $this->em->flush();
@@ -140,5 +152,16 @@ final class TaxonomyStep implements MigrationStep
             }
         }
         $this->em->flush();
+    }
+
+    /** "002.1" / "99.98" / "003" -> a sortable int (x100), empty -> a large number so it sinks. */
+    private static function orderKey(string $poradi): int
+    {
+        $poradi = trim(str_replace(',', '.', $poradi));
+        if ('' === $poradi || !is_numeric($poradi)) {
+            return 100000;
+        }
+
+        return (int) round((float) $poradi * 100);
     }
 }

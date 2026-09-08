@@ -7,6 +7,7 @@ apply: Použiť
 now: Teraz
 page_n: 'Strana %n%'
 page_next: Ďalšia strana
+page_prev: Predchádzajúca strana
 breadcrumb: Omrvinková navigácia
 pagination: Stránkovanie
 filters: Filtre
@@ -20,6 +21,7 @@ search:
   label: Hľadať v e-shope
   placeholder: 'Hľadať motív, povolanie, meno…'
   results_for: Výsledky hľadania pre
+  no_results: Nič sme nenašli. Skúste iné slová.
 
 header:
   verified: '98 % · Heureka Overené'
@@ -41,6 +43,8 @@ cart:
   total: Spolu
   to_checkout: Pokračovať k pokladni
   remove: Odobrať
+  empty: Košík je zatiaľ prázdny.
+  continue_shopping: Pokračovať v nákupe
   free_ship_hint: Pridajte za 6 € a máte dopravu Packetou zadarmo.
 
 pay:
@@ -104,6 +108,7 @@ home:
 category:
   in_stock: skladom, expedícia do 2 dní
   url_hint: 'URL stránkovania'
+  empty: V tejto kategórii zatiaľ nie sú žiadne produkty.
 
 sort:
   label: Zoradiť
@@ -144,6 +149,7 @@ param:
   material: Materiál
   weight: Gramáž
   fit: Strih
+  manufacturer: Výrobca
   print: Technológia potlače
   print_val: digitálna tlač (DTG)
   care: Údržba

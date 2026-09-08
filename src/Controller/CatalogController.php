@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Sample\SampleData;
+use App\Catalog\Catalog;
+use App\Catalog\Routing\UrlAliasResolver;
+use App\Enum\AliasTarget;
 use App\Store\StoreContext;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -14,57 +17,120 @@ final class CatalogController extends AbstractController
 {
     public function __construct(
         private readonly StoreContext $ctx,
-        private readonly SampleData $data,
+        private readonly Catalog $catalog,
+        private readonly UrlAliasResolver $aliases,
     ) {
     }
 
-    #[Route('/kategorie/{slug}', name: 'category', requirements: ['slug' => '[a-z0-9-]+'])]
-    public function category(string $slug): Response
+    #[Route('/hledani', name: 'search', priority: 10)]
+    public function search(Request $request): Response
     {
-        $view = $this->data->forStore($this->ctx->get()->code);
-        $category = $this->data->findCategory($slug);
-        if (null === $category) {
-            $t = ucfirst(str_replace('-', ' ', $slug));
-            $category = new \App\Sample\Category($slug, $t, $t, 42);
-        }
-        $parent = $category->parentSlug ? $this->data->findCategory($category->parentSlug) : null;
-
-        // sample grid: repeat store products to fill
-        $grid = array_merge($view->products, $view->products);
-
-        return $this->render('catalog/category.html.twig', [
-            'view' => $view,
-            'category' => $category,
-            'parent' => $parent,
-            'products' => \array_slice($grid, 0, 9),
-        ]);
-    }
-
-    #[Route('/produkt/{slug}', name: 'product', requirements: ['slug' => '[a-z0-9-]+'])]
-    public function product(string $slug): Response
-    {
-        $view = $this->data->forStore($this->ctx->get()->code);
-        $product = $this->data->findProduct($slug) ?? $view->products[0];
-        $category = $this->data->findCategory($product->categorySlug);
-        $related = array_values(array_filter($view->products, static fn ($p) => $p->slug !== $product->slug));
-
-        return $this->render('catalog/product.html.twig', [
-            'view' => $view,
-            'product' => $product,
-            'category' => $category,
-            'related' => \array_slice($related, 0, 3),
-        ]);
-    }
-
-    #[Route('/hledani', name: 'search')]
-    public function search(): Response
-    {
-        $view = $this->data->forStore($this->ctx->get()->code);
+        $store = $this->ctx->get();
+        $q = trim((string) $request->query->get('q', ''));
+        $page = max(1, $request->query->getInt('page', 1));
+        $result = $this->catalog->search($store, $q, $page);
 
         return $this->render('catalog/search.html.twig', [
-            'view' => $view,
-            'query' => 'kočka',
-            'products' => \array_slice($view->products, 0, 6),
+            'query' => $q,
+            'products' => $result['items'],
+            'total' => $result['total'],
+            'page' => $page,
+            'pages' => max(1, (int) ceil($result['total'] / Catalog::PER_PAGE)),
         ]);
+    }
+
+    /**
+     * The catch-all that keeps every old e-shop URL alive: resolves the path
+     * through the migrated redirects + url_aliases tables.
+     */
+    #[Route('/{path}', name: 'catalog', requirements: ['path' => '.+'], priority: -50)]
+    public function resolve(string $path): Response
+    {
+        $store = $this->ctx->get();
+        $full = '/'.ltrim($path, '/');
+
+        if (null !== ($redirect = $this->aliases->findRedirect($store, $full))) {
+            $code = $redirect->code >= 300 && $redirect->code < 400 ? $redirect->code : 301;
+
+            return $this->redirect($this->absolutise($redirect->target), $code);
+        }
+
+        // "/…/stranka-N" pagination suffix on category URLs
+        $page = 1;
+        if (preg_match('#^(.+)/stranka-(\d+)$#', $full, $m)) {
+            $full = $m[1];
+            $page = (int) $m[2];
+        }
+
+        $alias = $this->aliases->findAlias($store, $full);
+        if (null === $alias) {
+            // old id-bearing URL forms ("/slug-6382", "/slug-6382-14802", "/slug-detail-…")
+            $canonical = $this->catalog->legacyUrlPath($store, $full);
+            if (null !== $canonical && $canonical !== $full) {
+                return $this->redirect($canonical, 301);
+            }
+            throw $this->createNotFoundException();
+        }
+
+        return match ($alias->targetType) {
+            AliasTarget::Category => $this->renderCategory($alias->targetId, $page),
+            AliasTarget::Variant => $this->renderProduct($alias->targetId),
+            AliasTarget::Page => $this->renderPage($alias->targetId),
+            AliasTarget::Product => $this->renderProductByProductId($alias->targetId),
+        };
+    }
+
+    private function renderCategory(int $categoryId, int $page): Response
+    {
+        $view = $this->catalog->category($this->ctx->get(), $categoryId, $page);
+        if (null === $view) {
+            throw $this->createNotFoundException();
+        }
+        if ($page > 1 && $page > $view->pages) {
+            throw $this->createNotFoundException();
+        }
+
+        return $this->render('catalog/category.html.twig', ['cat' => $view]);
+    }
+
+    private function renderProduct(int $variantId): Response
+    {
+        $view = $this->catalog->product($this->ctx->get(), $variantId);
+        if (null === $view) {
+            throw $this->createNotFoundException();
+        }
+
+        return $this->render('catalog/product.html.twig', ['product' => $view]);
+    }
+
+    private function renderProductByProductId(int $productId): Response
+    {
+        // legacy product-level alias: fall back to the product's first variant
+        $store = $this->ctx->get();
+        $variantId = $this->catalog->firstVariantId($productId);
+        if (null === $variantId) {
+            throw $this->createNotFoundException();
+        }
+
+        return $this->renderProduct($variantId);
+    }
+
+    private function renderPage(int $pageId): Response
+    {
+        $view = $this->catalog->contentPage($this->ctx->get(), $pageId);
+        if (null === $view) {
+            throw $this->createNotFoundException();
+        }
+
+        return $this->render('page/content.html.twig', ['page' => $view]);
+    }
+
+    private function absolutise(string $target): string
+    {
+        if (str_starts_with($target, 'http://') || str_starts_with($target, 'https://')) {
+            return $target;
+        }
+
+        return '/'.ltrim($target, '/');
     }
 }
