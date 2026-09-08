@@ -18,6 +18,8 @@ use Doctrine\ORM\EntityManagerInterface;
 /** Build the url_aliases table from migrated slugs — the backbone of URL preservation. */
 final class UrlAliasStep implements MigrationStep
 {
+    private const BATCH = 5000;
+
     public function __construct(
         private readonly EntityManagerInterface $em,
     ) {
@@ -39,42 +41,41 @@ final class UrlAliasStep implements MigrationStep
         if (!$store instanceof Store) {
             return;
         }
+        $storeId = (int) $store->id;
         $locale = $source->locale();
 
         if (!$dryRun) {
-            // rebuild: drop this store's aliases first so the step is repeatable
-            $this->em->createQuery('DELETE FROM App\Entity\Content\UrlAlias a WHERE a.store = :s')
+            $this->em->createQuery('DELETE FROM '.UrlAlias::class.' a WHERE a.store = :s')
                 ->setParameter('s', $store)->execute();
         }
 
-        /** @var array<string,bool> $seen */
+        // collect every (path, target) pair up front — scalar hydration, no entities in the UoW
+        /** @var list<array{0:string,1:AliasTarget,2:int}> $pending */
+        $pending = [];
+        /** @var array<string,true> $seen */
         $seen = [];
-        $add = function (string $path, AliasTarget $type, int $id) use ($store, $locale, &$seen, $report, $dryRun): void {
+        $push = static function (string $path, AliasTarget $type, int $id) use (&$pending, &$seen, $report): void {
             $path = '/'.ltrim($path, '/');
-            if ('' === trim($path, '/') || isset($seen[$path])) {
+            if ('' === trim($path, '/') || mb_strlen($path) > 500 || isset($seen[$path])) {
                 return;
             }
             $seen[$path] = true;
-            if (!$dryRun) {
-                $this->em->persist(new UrlAlias($store, $locale, $path, $type, $id));
-            }
+            $pending[] = [$path, $type, $id];
             $report->add('url-aliases.'.$type->value);
         };
 
         foreach ($this->em->createQuery(
-            'SELECT t.slug AS slug, IDENTITY(t.category) AS cid FROM '.CategoryTranslation::class.' t JOIN t.category c WHERE c.store = :s AND t.locale = :l'
-        )->setParameter('s', $store)->setParameter('l', $locale)->toIterable() as $r) {
-            if ('' !== (string) $r['slug']) {
-                $add((string) $r['slug'], AliasTarget::Category, (int) $r['cid']);
-            }
+            'SELECT t.slug AS slug, IDENTITY(t.category) AS cid FROM '.CategoryTranslation::class.' t
+             JOIN t.category c WHERE c.store = :s AND t.locale = :l AND t.slug <> :e'
+        )->setParameter('s', $store)->setParameter('l', $locale)->setParameter('e', '')->getScalarResult() as $r) {
+            $push((string) $r['slug'], AliasTarget::Category, (int) $r['cid']);
         }
 
         foreach ($this->em->createQuery(
-            'SELECT t.slug AS slug, IDENTITY(t.page) AS pid FROM '.PageTranslation::class.' t JOIN t.page p WHERE p.store = :s AND t.locale = :l'
-        )->setParameter('s', $store)->setParameter('l', $locale)->toIterable() as $r) {
-            if ('' !== (string) $r['slug']) {
-                $add((string) $r['slug'], AliasTarget::Page, (int) $r['pid']);
-            }
+            'SELECT t.slug AS slug, IDENTITY(t.page) AS pid FROM '.PageTranslation::class.' t
+             JOIN t.page p WHERE p.store = :s AND t.locale = :l AND t.slug <> :e'
+        )->setParameter('s', $store)->setParameter('l', $locale)->setParameter('e', '')->getScalarResult() as $r) {
+            $push((string) $r['slug'], AliasTarget::Page, (int) $r['pid']);
         }
 
         foreach ($this->em->createQuery(
@@ -87,12 +88,25 @@ final class UrlAliasStep implements MigrationStep
             ->setParameter('vt', 'variant')
             ->setParameter('l', $locale)
             ->setParameter('e', '')
-            ->toIterable() as $r) {
-            $add((string) $r['slug'], AliasTarget::Variant, (int) $r['vid']);
+            ->getScalarResult() as $r) {
+            $push((string) $r['slug'], AliasTarget::Variant, (int) $r['vid']);
         }
 
-        if (!$dryRun) {
-            $this->em->flush();
+        if ($dryRun) {
+            return;
         }
+
+        $store = $this->em->getReference(Store::class, $storeId);
+        $i = 0;
+        foreach ($pending as [$path, $type, $id]) {
+            $this->em->persist(new UrlAlias($store, $locale, $path, $type, $id));
+            if (0 === ++$i % self::BATCH) {
+                $this->em->flush();
+                $this->em->clear();
+                $store = $this->em->getReference(Store::class, $storeId);
+            }
+        }
+        $this->em->flush();
+        $this->em->clear();
     }
 }

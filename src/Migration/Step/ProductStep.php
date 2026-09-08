@@ -76,14 +76,14 @@ final class ProductStep implements MigrationStep
 
             $p = new Product();
             $p->legacyId = $oldId;
-            $p->manufacturer = self::clean($r['manufacturer']);
-            $p->productType = self::clean($r['typ_zbozi']);
-            $p->printTechnology = self::clean($r['technologie']);
+            $p->manufacturer = self::clean($r['manufacturer'], 120);
+            $p->productType = self::clean($r['typ_zbozi'], 60);
+            $p->printTechnology = self::clean($r['technologie'], 60);
             $p->published = '1' === (string) $r['publikace'] || 1 === (int) $r['product_online'];
 
             $t = new ProductTranslation($p, $locale);
-            $t->name = trim((string) $r['product']);
-            $t->subtitle = self::clean($r['subtitle']);
+            $t->name = mb_substr(trim((string) $r['product']), 0, 255);
+            $t->subtitle = self::clean($r['subtitle'], 255);
             $t->description = self::clean($r['description']);
             $t->descriptionShort = self::clean($r['description_short']);
             $t->metaKeywords = self::clean($r['keywords']);
@@ -107,7 +107,7 @@ final class ProductStep implements MigrationStep
             foreach ($variantRows as $vi => $v) {
                 $variant = new ProductVariant($p);
                 $variant->legacyId = (int) $v['id'] > 0 ? (int) $v['id'] : null;
-                $variant->color = trim((string) $v['nazev_varianty']) ?: 'základní';
+                $variant->color = mb_substr(trim((string) $v['nazev_varianty']) ?: 'základní', 0, 60);
                 $variant->colorHex = Colors::hex($variant->color);
                 $variant->position = (int) $v['poradi'] ?: $vi;
 
@@ -170,10 +170,10 @@ final class ProductStep implements MigrationStep
         $this->em->clear();
     }
 
-    private static function clean(mixed $v): ?string
+    private static function clean(mixed $v, int $max = 65535): ?string
     {
         $v = trim((string) $v);
 
-        return '' === $v ? null : $v;
+        return '' === $v ? null : mb_substr($v, 0, $max);
     }
 }

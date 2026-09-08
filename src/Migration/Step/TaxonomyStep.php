@@ -84,11 +84,11 @@ final class TaxonomyStep implements MigrationStep
                 $cat->published = (bool) $r['publikace'];
                 // keep the old listing template as a layout hint for E4 (vypis_zbozi_spec_8 -> "spec_8")
                 $layout = trim(str_replace(['vypis_zbozi', '.php'], '', $sablona), '_');
-                $cat->listingLayout = '' === $layout ? 'grid' : $layout;
+                $cat->listingLayout = mb_substr('' === $layout ? 'grid' : $layout, 0, 40);
                 $t = new CategoryTranslation($cat, $locale);
-                $t->name = (string) $r['title'];
-                $t->slug = $alias;
-                $t->metaDescription = $r['description'] ? (string) $r['description'] : null;
+                $t->name = mb_substr((string) $r['title'], 0, 255);
+                $t->slug = mb_substr($alias, 0, 255);
+                $t->metaDescription = $r['description'] ? mb_substr((string) $r['description'], 0, 255) : null;
                 $t->bodyHtml = $r['text_stranky'] ? (string) $r['text_stranky'] : null;
                 $cat->translations->add($t);
                 $created[$oldId] = $cat;
@@ -104,9 +104,9 @@ final class TaxonomyStep implements MigrationStep
                 $page->position = (int) $r['poradi'];
                 $page->published = (bool) $r['publikace'];
                 $t = new PageTranslation($page, $locale);
-                $t->title = (string) $r['title'];
-                $t->slug = $alias;
-                $t->metaDescription = $r['description'] ? (string) $r['description'] : null;
+                $t->title = mb_substr((string) $r['title'], 0, 255);
+                $t->slug = mb_substr($alias, 0, 255);
+                $t->metaDescription = $r['description'] ? mb_substr((string) $r['description'], 0, 255) : null;
                 $t->bodyHtml = $r['text_stranky'] ? (string) $r['text_stranky'] : null;
                 $page->translations->add($t);
                 $created[$oldId] = $page;

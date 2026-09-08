@@ -85,24 +85,25 @@ final class CustomerStep implements MigrationStep
                 $report->add('customers.merged');
             } else {
                 $c = new Customer($email);
-                $c->legacyMd5 = self::clean($r['heslo']);
+                $c->legacyMd5 = self::clean($r['heslo'], 255);
                 $c->legacyKey = $source->value.'_'.$oldId;
-                $c->gender = self::clean($r['pohlavi']);
+                $c->gender = self::clean($r['pohlavi'], 8);
 
                 $addr = new CustomerAddress($c);
                 $addr->type = 'billing';
                 $addr->isDefault = true;
                 $a = $addr->address;
-                $a->company = self::clean($r['firma']);
+                $a->company = self::clean($r['firma'], 120);
                 [$fn, $ln] = self::splitName((string) ($r['jmeno_single'] ?: ''), (string) ($r['prijimeni_single'] ?: ''), (string) $r['jmeno']);
-                $a->firstName = $fn;
-                $a->lastName = $ln;
-                $a->street = self::clean($r['ulice_single']) ? trim(($r['ulice_single'] ?? '').' '.($r['cp_single'] ?? '')) : self::clean($r['ulice']);
-                $a->city = self::clean($r['mesto']);
-                $a->zip = self::clean($r['psc']);
-                $a->phone = self::clean($r['telefon']);
-                $a->companyId = self::clean($r['ic']);
-                $a->vatId = self::clean($r['dic']);
+                $a->firstName = self::clip($fn, 120);
+                $a->lastName = self::clip($ln, 120);
+                $street = self::clean($r['ulice_single']) ? trim(($r['ulice_single'] ?? '').' '.($r['cp_single'] ?? '')) : self::clean($r['ulice']);
+                $a->street = self::clip($street, 200);
+                $a->city = self::clean($r['mesto'], 120);
+                $a->zip = self::clean($r['psc'], 20);
+                $a->phone = self::clean($r['telefon'], 20);
+                $a->companyId = self::clean($r['ic'], 20);
+                $a->vatId = self::clean($r['dic'], 20);
                 $c->addresses->add($addr);
 
                 $c->stores->add(new CustomerStore($c, $store));
@@ -181,10 +182,15 @@ final class CustomerStep implements MigrationStep
         return [implode(' ', $parts), $ln];
     }
 
-    private static function clean(mixed $v): ?string
+    private static function clean(mixed $v, int $max = 255): ?string
     {
         $v = trim((string) $v);
 
-        return '' === $v ? null : $v;
+        return '' === $v ? null : mb_substr($v, 0, $max);
+    }
+
+    private static function clip(?string $v, int $max): ?string
+    {
+        return null === $v ? null : mb_substr($v, 0, $max);
     }
 }

@@ -67,19 +67,19 @@ final class OrderStep implements MigrationStep
                 ? (self::STATUS[(int) $r['status_objednavky']] ?? OrderStatus::New)
                 : OrderStatus::New;
             $o->customerNote = self::clean($r['poznamka'] ?? null);
-            $o->coupon = self::clean($r['slevovy_kod'] ?? null);
-            $o->source = self::clean($r['zdroj'] ?? null);
-            $o->pickupPoint = self::clean($r['vydejni_misto'] ?? null);
-            $o->shippingMethodCode = isset($r['doruceni']) ? 'legacy-'.$r['doruceni'] : null;
-            $o->billingAddress->firstName = self::clean($r['jmeno'] ?? null);
-            $o->billingAddress->company = self::clean($r['firma'] ?? null);
+            $o->coupon = self::clean($r['slevovy_kod'] ?? null, 50);
+            $o->source = self::clean($r['zdroj'] ?? null, 120);
+            $o->pickupPoint = self::clean($r['vydejni_misto'] ?? null, 255);
+            $o->shippingMethodCode = isset($r['doruceni']) ? self::clean('legacy-'.$r['doruceni'], 40) : null;
+            $o->billingAddress->firstName = self::clean($r['jmeno'] ?? null, 120);
+            $o->billingAddress->company = self::clean($r['firma'] ?? null, 120);
 
             $itemsTotal = 0;
             foreach ($this->db->all('SELECT * FROM '.$source->t('objednavky_polozky').' WHERE id_objednavky = ?', [$oldId]) as $li) {
                 $it = new OrderItem($o);
-                $it->nameSnapshot = trim((string) (($li['polozka_single'] ?? '') ?: $li['polozka']));
-                $it->variantSnapshot = trim(($li['barva'] ?? '').' / '.($li['velikost'] ?? ''), ' /') ?: null;
-                $it->skuSnapshot = self::clean($li['kod_zbozi'] ?? null);
+                $it->nameSnapshot = mb_substr(trim((string) (($li['polozka_single'] ?? '') ?: $li['polozka'])), 0, 255);
+                $it->variantSnapshot = self::clean(trim(($li['barva'] ?? '').' / '.($li['velikost'] ?? ''), ' /') ?: null, 120);
+                $it->skuSnapshot = self::clean($li['kod_zbozi'] ?? null, 64);
                 $it->quantity = max(1, (int) $li['pocet_ks']);
                 $it->unitPrice = (int) round((float) $li['cena']);
                 $itemsTotal += $it->quantity * $it->unitPrice;
@@ -98,7 +98,7 @@ final class OrderStep implements MigrationStep
             if (null !== $custNew) {
                 $o->customer = $this->em->getReference(Customer::class, $custNew);
             } elseif (null !== ($email = self::emailFrom($r['kontrolni_retezec'] ?? null))) {
-                $o->email = $email;
+                $o->email = mb_substr($email, 0, 190);
                 $c = $this->em->getRepository(Customer::class)->findOneBy(['email' => $email]);
                 if ($c instanceof Customer) {
                     $o->customer = $c;
@@ -142,11 +142,11 @@ final class OrderStep implements MigrationStep
         $this->ids->warmup($source, 'customer');
     }
 
-    private static function clean(mixed $v): ?string
+    private static function clean(mixed $v, int $max = 65535): ?string
     {
         $v = trim((string) $v);
 
-        return '' === $v ? null : $v;
+        return '' === $v ? null : mb_substr($v, 0, $max);
     }
 
     /** cooldresy stores "<email>_<junk>" in kontrolni_retezec — pull a valid e-mail out of the front. */
