@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Eshop platforma — {{ store.name }}{% endblock %}
+
+{% block body %}
+    <h1>Eshop platforma</h1>
+    <p class="sub">Vývojová kostra běží. Aktivní eshop podle domény: <strong>{{ store.name }}</strong>.</p>
+
+    <div class="card">
+        <h2>Prostředí</h2>
+        <div class="kv"><span>PHP</span><span>{{ phpVersion }}</span></div>
+        <div class="kv"><span>Symfony</span><span>{{ symfonyVersion }} (LTS)</span></div>
+        <div class="kv"><span>Databáze</span>
+            <span class="{{ dbVersion ? 'ok' : 'bad' }}">{{ dbVersion ?: 'nedostupná' }}</span></div>
+        <div class="kv"><span>Locale</span><span>{{ app.request.locale }}</span></div>
+    </div>
+
+    <div class="card">
+        <h2>Eshopy (multi-tenant)</h2>
+        <div class="stores">
+            {% for s in stores %}
+                <a class="store {{ s.code == store.code ? 'active' : '' }}"
+                   href="{{ app.request.scheme }}://{{ s.shortHost }}.ddev.site/">
+                    <span class="badge">{{ s.code|upper }}</span>
+                    <strong>{{ s.name }}</strong>
+                    <span style="color:#9c948a">{{ s.host }} · {{ s.locale }} · {{ s.currency }}</span>
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
