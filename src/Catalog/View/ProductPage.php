@@ -8,8 +8,11 @@ namespace App\Catalog\View;
 final readonly class ProductPage
 {
     /**
-     * @param list<ColorRef>   $colors
-     * @param list<SizeOption> $sizes
+     * @param list<ColorRef>                                 $colors
+     * @param list<SizeOption>                               $sizes
+     * @param list<array{name:string,value:string}>          $parameters
+     * @param list<array{question:string,answerHtml:string}> $faqs
+     * @param list<array{name:string,path:string}>           $breadcrumbs
      */
     public function __construct(
         public int $productId,
@@ -25,6 +28,10 @@ final readonly class ProductPage
         public ColorRef $selectedColor,
         public array $colors,
         public array $sizes,
+        public array $parameters = [],
+        public array $faqs = [],
+        public array $breadcrumbs = [],
+        public ?string $metaDescription = null,
         public ?string $manufacturer = null,
         public ?string $material = null,
         public ?int $weightGsm = null,

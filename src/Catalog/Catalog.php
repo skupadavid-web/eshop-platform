@@ -182,7 +182,7 @@ final class Catalog
         $selected ??= $colors[0] ?? new ColorRef((int) $variant->id, 'default', $variant->color, $variant->colorHex ?? '#cccccc', '/'.($this->variantSlug($variant, $locale) ?? ''));
 
         $vt = $this->em->createQuery(
-            'SELECT t.descriptionExtended AS ext FROM '.\App\Entity\Catalog\VariantTranslation::class.' t
+            'SELECT t.descriptionExtended AS ext, t.metaDescription AS meta FROM '.\App\Entity\Catalog\VariantTranslation::class.' t
              WHERE t.variant = :v AND t.locale = :l'
         )->setParameter('v', $variant)->setParameter('l', $locale)->setMaxResults(1)->getOneOrNullResult();
 
@@ -197,6 +197,16 @@ final class Catalog
         }
 
         $price = $this->priceFor($storeEntity, $product, $variant);
+        $crumbs = $this->productBreadcrumbs($storeEntity, $product, $locale);
+        $params = $this->parametersOf($product, $storeEntity, $locale);
+        $vtExt = \is_array($vt) ? ($vt['ext'] ?? null) : null;
+        $vtMeta = \is_array($vt) ? ($vt['meta'] ?? null) : null;
+        $material = null;
+        foreach ($params as $pr) {
+            if ('Materiál' === $pr['name']) {
+                $material = $pr['value'];
+            }
+        }
 
         return new ProductPage(
             (int) $product->id,
@@ -204,7 +214,7 @@ final class Catalog
             (string) $pt['name'],
             $pt['subtitle'] ?? null,
             $pt['description'] ?? null,
-            \is_array($vt) ? ($vt['ext'] ?? null) : null,
+            $vtExt,
             $selected->path,
             $selected->path,
             $price['price'],
@@ -212,12 +222,109 @@ final class Catalog
             $selected,
             $colors,
             $sizes,
+            $params,
+            $this->faqsFor($storeEntity, $product),
+            $crumbs,
+            $vtMeta ?? self::snippet($pt['subtitle'] ?? null) ?? self::snippet($pt['description'] ?? null),
             $product->manufacturer,
-            $product->material,
+            $material ?? $product->material,
             $product->weightGsm,
             $product->gender,
             $product->printTechnology,
         );
+    }
+
+    /**
+     * Store templates + per-product overrides + a generated "Zařazeno v kategoriích".
+     *
+     * @return list<array{name:string,value:string}>
+     */
+    private function parametersOf(Product $product, StoreEntity $store, string $locale): array
+    {
+        $byName = [];
+        $pos = [];
+
+        foreach ($this->em->createQuery(
+            'SELECT pt.name AS name, pt.value AS value, pt.position AS p FROM '.\App\Entity\Catalog\ParameterTemplate::class.' pt
+             WHERE pt.store = :s AND pt.category IS NULL ORDER BY pt.position'
+        )->setParameter('s', $store)->getArrayResult() as $r) {
+            $byName[$r['name']] = (string) $r['value'];
+            $pos[$r['name']] = (int) $r['p'];
+        }
+        foreach ($this->em->createQuery(
+            'SELECT pp.name AS name, pp.value AS value, pp.position AS p FROM '.\App\Entity\Catalog\ProductParameter::class.' pp
+             WHERE pp.product = :p ORDER BY pp.position, pp.id'
+        )->setParameter('p', $product)->getArrayResult() as $r) {
+            $byName[$r['name']] = (string) $r['value'];
+            $pos[$r['name']] = (int) $r['p'];
+        }
+
+        /** @var list<string> $cats */
+        $cats = $this->em->createQuery(
+            'SELECT t.name FROM '.\App\Entity\Taxonomy\CategoryTranslation::class.' t
+             JOIN t.category c JOIN c.products cp WHERE cp.product = :p AND t.locale = :l ORDER BY cp.position'
+        )->setParameter('p', $product)->setParameter('l', $locale)->getSingleColumnResult();
+        if ([] !== $cats) {
+            $byName['Zařazeno v kategoriích'] = implode(', ', \array_slice(array_map('strval', $cats), 0, 6));
+            $pos['Zařazeno v kategoriích'] = 8;
+        }
+
+        uksort($byName, static fn ($a, $b) => ($pos[$a] ?? 99) <=> ($pos[$b] ?? 99));
+
+        return array_map(static fn ($k, $v) => ['name' => $k, 'value' => $v], array_keys($byName), array_values($byName));
+    }
+
+    /**
+     * @return list<array{question:string,answerHtml:string}>
+     */
+    private function faqsFor(StoreEntity $store, Product $product): array
+    {
+        /** @var list<array{question:string,answerHtml:string}> $rows */
+        $rows = $this->em->createQuery(
+            'SELECT f.question AS question, f.answerHtml AS answerHtml FROM '.\App\Entity\Content\Faq::class.' f
+             WHERE f.store = :s AND (f.product = :p OR f.product IS NULL)
+             ORDER BY CASE WHEN f.product IS NULL THEN 1 ELSE 0 END, f.position, f.id'
+        )->setParameter('s', $store)->setParameter('p', $product)->getArrayResult();
+
+        return $rows;
+    }
+
+    /**
+     * @return list<array{name:string,path:string}>
+     */
+    private function productBreadcrumbs(StoreEntity $store, Product $product, string $locale): array
+    {
+        $catId = $this->em->createQuery(
+            'SELECT c.id FROM '.CategoryProduct::class.' cp JOIN cp.category c
+             WHERE cp.product = :p AND c.store = :s ORDER BY cp.position, cp.id'
+        )->setParameter('p', $product)->setParameter('s', $store)->setMaxResults(1)
+            ->getOneOrNullResult(\Doctrine\ORM\Query::HYDRATE_SINGLE_SCALAR);
+        if (null === $catId) {
+            return [];
+        }
+
+        $trail = [];
+        $cursor = $this->em->getRepository(Category::class)->find((int) $catId);
+        $guard = 0;
+        while ($cursor instanceof Category && $guard++ < 6) {
+            $t = $this->categoryNames($locale, [(int) $cursor->id])[(int) $cursor->id] ?? null;
+            if ($t) {
+                array_unshift($trail, ['name' => $t['name'], 'path' => '/'.$t['slug']]);
+            }
+            $cursor = $cursor->parent;
+        }
+
+        return $trail;
+    }
+
+    private static function snippet(?string $html): ?string
+    {
+        if (null === $html) {
+            return null;
+        }
+        $text = trim(preg_replace('/\s+/', ' ', strip_tags($html)) ?? '');
+
+        return '' === $text ? null : mb_substr($text, 0, 155);
     }
 
     /**

@@ -14,6 +14,18 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
     {{ importmap('app') }}
+    <script type="application/ld+json">{{ {
+        '@context': 'https://schema.org',
+        '@type': 'OnlineStore',
+        '@id': 'https://' ~ store.host ~ '/#organization',
+        'name': store.name,
+        'url': 'https://' ~ store.host ~ '/',
+        'email': store.email,
+        'telephone': store.phone,
+        'address': {'@type': 'PostalAddress', 'streetAddress': legal.address, 'addressCountry': (store.currency == 'EUR' ? 'SK' : 'CZ')},
+        'founder': {'@type': 'Person', 'name': legal.name},
+        'taxID': legal.ico
+    }|json_encode(constant('JSON_UNESCAPED_UNICODE') b-or constant('JSON_UNESCAPED_SLASHES'))|raw }}</script>
 </head>
 <body>
     <a href="#obsah" class="skip">{{ 'skip_to_content'|trans }}</a>

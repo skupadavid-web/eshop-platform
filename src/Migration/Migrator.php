@@ -94,7 +94,11 @@ final class Migrator
      */
     private function order(array $steps): array
     {
-        $rank = ['taxonomy' => 10, 'products' => 20, 'category-products' => 30, 'primary-variants' => 35, 'url-aliases' => 40, 'redirects' => 45, 'customers' => 50, 'orders' => 60];
+        $rank = [
+            'taxonomy' => 10, 'products' => 20, 'parameters' => 22, 'faq' => 24, 'descriptions' => 26,
+            'category-products' => 30, 'primary-variants' => 35, 'url-aliases' => 40, 'redirects' => 45,
+            'customers' => 50, 'orders' => 60,
+        ];
         usort($steps, static fn (MigrationStep $a, MigrationStep $b) => ($rank[$a->name()] ?? 99) <=> ($rank[$b->name()] ?? 99));
 
         return $steps;

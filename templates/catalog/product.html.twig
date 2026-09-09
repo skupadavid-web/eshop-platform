@@ -2,14 +2,17 @@
 {% import '_macros/ui.html.twig' as ui %}
 {% set c0 = product.selectedColor %}
 {% block title %}{{ product.name }}{{ c0 ? ' – ' ~ c0.name : '' }} — {{ store.name }}{% endblock %}
-{% block meta_description %}{{ product.descriptionHtml ? product.descriptionHtml|striptags|slice(0, 155) : product.name }}{% endblock %}
+{% block meta_description %}{{ product.metaDescription ?: (product.descriptionHtml ? product.descriptionHtml|striptags|slice(0, 155) : product.name) }}{% endblock %}
 {% block canonical %}{{ app.request.schemeAndHttpHost }}{{ product.canonicalPath }}{% endblock %}
 {% block body %}
+{% for block in json_ld %}<script type="application/ld+json">{{ block|raw }}</script>
+{% endfor %}
 <div class="wrap">
-    {{ ui.crumb([
-        {label: 'nav.home'|trans, href: path('home')},
-        {label: product.name}
-    ]) }}
+    {{ ui.crumb(
+        [{label: 'nav.home'|trans, href: path('home')}]
+        |merge(product.breadcrumbs|map(c => {label: c.name, href: c.path}))
+        |merge([{label: product.name}])
+    ) }}
 
     <div class="pd">
         <div class="pd-gallery">
@@ -79,20 +82,35 @@
     </div>
 
     <div class="pd-below">
-        {% if product.descriptionHtml or product.descriptionExtendedHtml %}
+        {% set body = product.descriptionExtendedHtml ?: product.descriptionHtml %}
+        {% if body %}
         <div><h2 style="margin-bottom:10px">{{ 'product.description'|trans }}</h2>
-            <div style="color:var(--ink-muted)">{{ product.descriptionHtml|raw }}{{ product.descriptionExtendedHtml|raw }}</div>
+            <div class="page-body" style="color:var(--ink-muted)">{{ body|raw }}</div>
         </div>
         {% endif %}
+
+        {% if product.parameters is not empty %}
         <div><h2 style="margin-bottom:10px">{{ 'product.parameters'|trans }}</h2>
             <table class="spec-table">
-                {% if product.material %}<tr><td>{{ 'param.material'|trans }}</td><td>{{ product.material }}</td></tr>{% endif %}
-                {% if product.weightGsm %}<tr><td>{{ 'param.weight'|trans }}</td><td>{{ product.weightGsm }} g/m²</td></tr>{% endif %}
-                {% if product.gender %}<tr><td>{{ 'param.fit'|trans }}</td><td>{{ product.gender }}</td></tr>{% endif %}
-                {% if product.printTechnology %}<tr><td>{{ 'param.print'|trans }}</td><td>{{ product.printTechnology }}</td></tr>{% endif %}
-                {% if product.manufacturer %}<tr><td>{{ 'param.manufacturer'|trans }}</td><td>{{ product.manufacturer }}</td></tr>{% endif %}
+                {% for row in product.parameters %}
+                    <tr><td>{{ row.name }}</td><td>{{ row.value }}</td></tr>
+                {% endfor %}
             </table>
         </div>
+        {% endif %}
+
+        {% if product.faqs is not empty %}
+        <div><h2 style="margin-bottom:12px">{{ 'product.faq'|trans }}</h2>
+            <div class="acc">
+                {% for f in product.faqs %}
+                    <details>
+                        <summary>{{ f.question }}<span aria-hidden="true">+</span></summary>
+                        <div class="acc-body">{{ f.answerHtml|raw }}</div>
+                    </details>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

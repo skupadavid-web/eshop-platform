@@ -29,8 +29,14 @@ Toku / dat / URL se dotýkající věci sem NEpatří — ty se řeší hned.
       (digitální tisk / termolis / sítotisk / DTF).
 - [ ] Šablonové artefakty v produktových textech: „…barva 12 ve složení 85 % bavlna…",
       generické popisy s proměnnými. → 1:1 migrace teď, systematické čištění později.
-- [ ] `~9 800` nejnovějších `8_shopdata_podrobnosti_rozsirene` řádků chybí (export padal) —
-      až bude re-export, doplnit rozšířené texty per varianta.
+- [ ] `~9 800` nejnovějších `8_shopdata_podrobnosti_rozsirene` řádků chybí (export padal u id 458076) —
+      až bude re-export, doplnit popisky per varianta (`descriptions` step). Nejnovější
+      produkty (id varianty > 458076) teď nemají hlavní popis vůbec.
+- [ ] `parameter_templates` (Materiál, Gramáž…) jsou naimportované jen pro tsp
+      (`8_shopdata_list` je jen v tsp dumpu). tsl/cd nastavit ručně v `app:seed`
+      nebo dodat dumpy `8_shopdata_list` / `_faq` pro tsl.
+- [ ] FAQ „Pro koho je tričko určené?" má odpověď == parametr „Určeno jako" —
+      zvážit generovat dynamicky místo ukládat (30k řádků navíc).
 
 ## Pokladna / objednávky (E5 dluhy)
 

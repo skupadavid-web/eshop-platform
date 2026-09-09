@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Catalog\Catalog;
+use App\Catalog\JsonLd;
 use App\Catalog\Routing\UrlAliasResolver;
 use App\Enum\AliasTarget;
 use App\Store\StoreContext;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -19,6 +21,8 @@ final class CatalogController extends AbstractController
         private readonly StoreContext $ctx,
         private readonly Catalog $catalog,
         private readonly UrlAliasResolver $aliases,
+        private readonly JsonLd $jsonLd,
+        private readonly RequestStack $requestStack,
     ) {
     }
 
@@ -95,12 +99,17 @@ final class CatalogController extends AbstractController
 
     private function renderProduct(int $variantId): Response
     {
-        $view = $this->catalog->product($this->ctx->get(), $variantId);
+        $store = $this->ctx->get();
+        $view = $this->catalog->product($store, $variantId);
         if (null === $view) {
             throw $this->createNotFoundException();
         }
+        $base = $this->requestStack->getCurrentRequest()?->getSchemeAndHttpHost() ?? 'https://'.$store->host;
 
-        return $this->render('catalog/product.html.twig', ['product' => $view]);
+        return $this->render('catalog/product.html.twig', [
+            'product' => $view,
+            'json_ld' => $this->jsonLd->forProduct($view, $store, $base),
+        ]);
     }
 
     private function renderProductByProductId(int $productId): Response

@@ -70,10 +70,16 @@ class Product
     #[ORM\OneToMany(mappedBy: 'product', targetEntity: ProductAttributeValue::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     public Collection $attributeValues;
 
+    /** @var Collection<int,ProductParameter> */
+    #[ORM\OneToMany(mappedBy: 'product', targetEntity: ProductParameter::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[ORM\OrderBy(['position' => 'ASC'])]
+    public Collection $parameters;
+
     public function __construct()
     {
         $this->translations = new ArrayCollection();
         $this->variants = new ArrayCollection();
         $this->attributeValues = new ArrayCollection();
+        $this->parameters = new ArrayCollection();
     }
 }
