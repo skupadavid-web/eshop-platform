@@ -3,7 +3,13 @@
 {% macro product_card(p) %}
     {% set c0 = p.primaryColor %}
     <a class="pcard" href="{{ p.path }}">
-        <div class="shirt-tile">{{ shirt(c0 ? c0.hex : '#0b5fa5', p.motif, p.name ~ (c0 ? ', ' ~ c0.name : '')) }}</div>
+        <div class="shirt-tile">
+            {%- if p.image -%}
+                <img src="{{ store.imageUrl(p.image) }}" alt="{{ p.name }}{{ c0 ? ', ' ~ c0.name : '' }}" loading="lazy" decoding="async" width="300" height="360">
+            {%- else -%}
+                {{ shirt(c0 ? c0.hex : '#0b5fa5', p.motif, p.name ~ (c0 ? ', ' ~ c0.name : '')) }}
+            {%- endif -%}
+        </div>
         <div><div class="ptitle">{{ p.name }}</div>{% if p.subtitle %}<div class="psub">{{ p.subtitle }}</div>{% endif %}</div>
         <div class="pfoot">
             <span class="pprice">{{ p.price|money }}</span>

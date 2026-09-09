@@ -13,11 +13,19 @@
 
     <div class="pd">
         <div class="pd-gallery">
-            <div class="pd-main" id="pdMain">{{ shirt(c0.hex, product.motif, product.name ~ ', ' ~ c0.name) }}</div>
+            <div class="pd-main" id="pdMain">
+                {%- if c0.image -%}
+                    <img src="{{ store.imageUrl(c0.image) }}" alt="{{ product.name }}, {{ c0.name }}" decoding="async" width="640" height="768">
+                {%- else -%}
+                    {{ shirt(c0.hex, product.motif, product.name ~ ', ' ~ c0.name) }}
+                {%- endif -%}
+            </div>
             {% if product.colors|length > 1 %}
             <div class="pd-thumbs" role="group" aria-label="{{ 'product.color'|trans }}">
                 {% for col in product.colors %}
-                    <a class="pd-thumb" href="{{ col.path }}" aria-pressed="{{ col.variantId == product.variantId ? 'true' : 'false' }}" aria-label="{{ 'product.color'|trans }} {{ col.name }}">{{ shirt(col.hex, product.motif) }}</a>
+                    <a class="pd-thumb" href="{{ col.path }}" aria-pressed="{{ col.variantId == product.variantId ? 'true' : 'false' }}" aria-label="{{ 'product.color'|trans }} {{ col.name }}">
+                        {%- if col.image -%}<img src="{{ store.imageUrl(col.image) }}" alt="" loading="lazy" decoding="async" width="72" height="86">{%- else -%}{{ shirt(col.hex, product.motif) }}{%- endif -%}
+                    </a>
                 {% endfor %}
             </div>
             {% endif %}

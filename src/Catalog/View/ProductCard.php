@@ -17,6 +17,7 @@ final readonly class ProductCard
         public string $path,
         public int $price,
         public array $colors,
+        public ?string $image = null,
         public string $motif = 'blank',
         public ?float $rating = null,
         public int $reviews = 0,

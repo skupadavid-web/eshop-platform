@@ -475,4 +475,9 @@ a.swatch{display:inline-block}
 .form-errors{background:#fff4f4;border:1px solid #f0c9c9;border-radius:10px;padding:12px 14px;margin-bottom:16px;color:#a12b2b;font-size:14px}
 .cart-toast{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:#eef7ee;border:1px solid #bfe0bf;color:#1f6b32;border-radius:10px;padding:10px 14px;margin:12px 0;font-size:14px;font-weight:600}
 .cart-toast .btn{margin-left:auto}
+.shirt-tile img,.pd-main img,.pd-thumb img{width:100%;height:100%;object-fit:contain;display:block;background:#fff}
+.pd-main img{border-radius:var(--radius-lg)}
+.img-missing img{visibility:hidden}
+.img-missing::after{content:"👕";font-size:32px;opacity:.25;position:absolute}
+.shirt-tile,.pd-main,.pd-thumb{position:relative;place-items:center}
 @media(max-width:820px){ .co-grid{grid-template-columns:1fr} .formgrid{grid-template-columns:1fr} }

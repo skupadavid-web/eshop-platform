@@ -394,13 +394,15 @@ final class Catalog
         $cards = [];
         foreach ($rows as $r) {
             $pid = (int) $r['id'];
+            $colors = $colorsByProduct[$pid] ?? [];
             $cards[] = new ProductCard(
                 $pid,
                 (string) $r['name'],
                 $r['subtitle'] ?? null,
                 $this->productPath($pid, $locale, $colorsByProduct),
                 (int) ($r['price'] ?? 0),
-                $colorsByProduct[$pid] ?? [],
+                $colors,
+                $colors[0]->image ?? null,
             );
         }
 
@@ -436,16 +438,29 @@ final class Catalog
              ORDER BY v.position, v.id'
         )->setParameter('l', $locale)->setParameter('ids', $productIds)->getArrayResult();
 
+        $variantIds = array_map(static fn ($r) => (int) $r['vid'], $rows);
+        $imgByVariant = [];
+        if ([] !== $variantIds) {
+            foreach ($this->em->createQuery(
+                'SELECT IDENTITY(vm.variant) AS vid, vm.path AS path FROM '.\App\Entity\Catalog\VariantMedia::class.' vm
+                 WHERE vm.variant IN (:vids) ORDER BY vm.position, vm.id'
+            )->setParameter('vids', $variantIds)->getArrayResult() as $m) {
+                $imgByVariant[(int) $m['vid']] ??= (string) $m['path'];
+            }
+        }
+
         $out = [];
         foreach ($rows as $r) {
             $pid = (int) $r['pid'];
+            $vid = (int) $r['vid'];
             $slug = (string) ($r['slug'] ?? '');
             $out[$pid][] = new ColorRef(
-                (int) $r['vid'],
+                $vid,
                 $this->colorKey((string) $r['name']),
                 (string) $r['name'],
                 (string) ($r['hex'] ?? '#cccccc'),
                 '' !== $slug ? '/'.$slug : '#',
+                $imgByVariant[$vid] ?? null,
             );
         }
 

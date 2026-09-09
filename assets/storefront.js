@@ -52,6 +52,14 @@ ready(() => {
         sync();
     });
 
+    // --- product images: mark the ones that fail to load (some live paths 404 while
+    //     images are served from the old sites) so the tile stays neutral ---
+    document.querySelectorAll('.shirt-tile img, .pd-main img, .pd-thumb img').forEach((img) => {
+        const flag = () => img.closest('.shirt-tile, .pd-main, .pd-thumb')?.classList.add('img-missing');
+        if (img.complete && img.naturalWidth === 0) flag();
+        img.addEventListener('error', flag);
+    });
+
     // --- skip link moves focus to main content ---
     const skip = document.querySelector('.skip');
     if (skip) skip.addEventListener('click', () => {
