@@ -75,6 +75,7 @@ final class SmokeTest extends WebTestCase
         $variant = new ProductVariant($product);
         $variant->color = 'modrá';
         $variant->colorHex = '#2456c9';
+        $variant->isDefault = true;
         $vt = new VariantTranslation($variant, 'cs');
         $vt->name = 'modrá';
         $vt->slug = ltrim(self::VARIANT_PATH, '/');

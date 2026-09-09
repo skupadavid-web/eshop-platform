@@ -35,6 +35,10 @@ class ProductVariant
     #[ORM\Column]
     public int $position = 0;
 
+    /** The product's default colour when no category says otherwise (old zarazeni = 1). */
+    #[ORM\Column]
+    public bool $isDefault = false;
+
     #[ORM\Column]
     public bool $published = true;
 

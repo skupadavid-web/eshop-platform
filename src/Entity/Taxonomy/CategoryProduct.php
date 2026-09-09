@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Entity\Taxonomy;
 
 use App\Entity\Catalog\Product;
+use App\Entity\Catalog\ProductVariant;
 use Doctrine\ORM\Mapping as ORM;
 
 /** M:N category <-> product with ordering (old {w}_stranky_zbozi_xy). */
@@ -28,6 +29,14 @@ class CategoryProduct
 
     #[ORM\Column]
     public int $position = 0;
+
+    /**
+     * The colour variant to show first for this product *in this category*
+     * (old 8_shopdata_orig_popisky). Overrides {@see ProductVariant::$isDefault}.
+     */
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    public ?ProductVariant $defaultVariant = null;
 
     public function __construct(Category $category, Product $product)
     {

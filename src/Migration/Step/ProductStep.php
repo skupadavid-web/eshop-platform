@@ -94,22 +94,25 @@ final class ProductStep implements MigrationStep
             $sizes = array_values(array_filter(array_map('trim', explode(',', (string) $r['velikosti_1']))));
 
             $variantRows = $this->db->all(sprintf(
-                'SELECT id, nazev_varianty, img_url, alias_varianta, poradi
+                'SELECT id, nazev_varianty, img_url, alias_varianta, poradi, zarazeni
                  FROM %s WHERE id_produktu = ? ORDER BY poradi, id',
                 $source->t('shopdata_podrobnosti'),
             ), [$oldId]);
 
             if ([] === $variantRows) {
                 // product without variants: synthesise one "default" variant so sizes have a home
-                $variantRows = [['id' => -$oldId, 'nazev_varianty' => '', 'img_url' => null, 'alias_varianta' => null, 'poradi' => 0]];
+                $variantRows = [['id' => -$oldId, 'nazev_varianty' => '', 'img_url' => null, 'alias_varianta' => null, 'poradi' => 0, 'zarazeni' => 1]];
             }
 
+            $hasDefault = false;
             foreach ($variantRows as $vi => $v) {
                 $variant = new ProductVariant($p);
                 $variant->legacyId = (int) $v['id'] > 0 ? (int) $v['id'] : null;
                 $variant->color = mb_substr(trim((string) $v['nazev_varianty']) ?: 'základní', 0, 60);
                 $variant->colorHex = Colors::hex($variant->color);
                 $variant->position = (int) $v['poradi'] ?: $vi;
+                $variant->isDefault = 1 === (int) ($v['zarazeni'] ?? 0);
+                $hasDefault = $hasDefault || $variant->isDefault;
 
                 $vt = new VariantTranslation($variant, $locale);
                 $vt->name = $variant->color;
@@ -131,6 +134,10 @@ final class ProductStep implements MigrationStep
                 $p->variants->add($variant);
                 $report->add('variants');
                 $report->add('sizes', \count($sizes));
+            }
+            $firstVariant = $p->variants->first();
+            if (!$hasDefault && $firstVariant instanceof ProductVariant) {
+                $firstVariant->isDefault = true; // source had no zarazeni=1
             }
 
             $price = new Price($store, $p);

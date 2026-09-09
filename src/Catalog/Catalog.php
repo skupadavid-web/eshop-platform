@@ -99,9 +99,10 @@ final class Catalog
              WHERE cp.category = :c AND p.published = true'
         )->setParameter('c', $category)->getSingleScalarResult();
 
-        /** @var list<array{id:int,name:string,subtitle:?string,price:?int}> $rows */
+        /** @var list<array{id:int,name:string,subtitle:?string,price:?int,pref:?int}> $rows */
         $rows = $this->em->createQuery(
-            'SELECT p.id AS id, pt.name AS name, pt.subtitle AS subtitle, pr.price AS price
+            'SELECT p.id AS id, pt.name AS name, pt.subtitle AS subtitle, pr.price AS price,
+                    IDENTITY(cp.defaultVariant) AS pref
              FROM '.CategoryProduct::class.' cp
              JOIN cp.product p
              JOIN '.\App\Entity\Catalog\ProductTranslation::class.' pt ON pt.product = p AND pt.locale = :l
@@ -112,7 +113,13 @@ final class Catalog
             ->setParameter('l', $locale)->setParameter('s', $storeEntity)->setParameter('c', $category)
             ->setFirstResult($offset)->setMaxResults(self::PER_PAGE)->getArrayResult();
 
-        $cards = $this->cards($rows, $locale);
+        $preferred = [];
+        foreach ($rows as $r) {
+            if (null !== $r['pref']) {
+                $preferred[(int) $r['id']] = (int) $r['pref'];
+            }
+        }
+        $cards = $this->cards($rows, $locale, $preferred);
 
         // breadcrumb: walk up the parent chain
         $crumbs = [];
@@ -283,7 +290,7 @@ final class Catalog
             'SELECT t.slug FROM '.\App\Entity\Catalog\VariantTranslation::class.' t
              JOIN t.variant v
              WHERE IDENTITY(v.product) = :p AND t.locale = :l AND t.slug IS NOT NULL AND t.slug <> :e
-             ORDER BY v.position, v.id'
+             ORDER BY v.isDefault DESC, v.position, v.id'
         )->setParameter('p', (int) $newId)->setParameter('l', $store->locale)->setParameter('e', '')
             ->setMaxResults(1)->getOneOrNullResult(\Doctrine\ORM\Query::HYDRATE_SINGLE_SCALAR);
 
@@ -293,7 +300,8 @@ final class Catalog
     public function firstVariantId(int $productId): ?int
     {
         $id = $this->em->createQuery(
-            'SELECT v.id FROM '.ProductVariant::class.' v WHERE IDENTITY(v.product) = :p ORDER BY v.position, v.id'
+            'SELECT v.id FROM '.ProductVariant::class.' v
+             WHERE IDENTITY(v.product) = :p ORDER BY v.isDefault DESC, v.position, v.id'
         )->setParameter('p', $productId)->setMaxResults(1)
             ->getOneOrNullResult(\Doctrine\ORM\Query::HYDRATE_SINGLE_SCALAR);
 
@@ -383,10 +391,11 @@ final class Catalog
 
     /**
      * @param list<array{id:int,name:string,subtitle:?string,price:?int}> $rows
+     * @param array<int,int>                                              $preferred product id => variant id to show first
      *
      * @return list<ProductCard>
      */
-    private function cards(array $rows, string $locale): array
+    private function cards(array $rows, string $locale, array $preferred = []): array
     {
         $ids = array_map(static fn ($r) => (int) $r['id'], $rows);
         $colorsByProduct = $this->colorsForProducts($ids, $locale);
@@ -394,12 +403,12 @@ final class Catalog
         $cards = [];
         foreach ($rows as $r) {
             $pid = (int) $r['id'];
-            $colors = $colorsByProduct[$pid] ?? [];
+            $colors = self::primaryFirst($colorsByProduct[$pid] ?? [], $preferred[$pid] ?? null);
             $cards[] = new ProductCard(
                 $pid,
                 (string) $r['name'],
                 $r['subtitle'] ?? null,
-                $this->productPath($pid, $locale, $colorsByProduct),
+                $colors[0]->path ?? '#',
                 (int) ($r['price'] ?? 0),
                 $colors,
                 $colors[0]->image ?? null,
@@ -410,19 +419,31 @@ final class Catalog
     }
 
     /**
-     * @param array<int,list<ColorRef>> $colorsByProduct
+     * @param list<ColorRef> $colors already ordered "default colour first" by the query
+     *
+     * @return list<ColorRef>
      */
-    private function productPath(int $productId, string $locale, array $colorsByProduct): string
+    private static function primaryFirst(array $colors, ?int $preferredVariantId): array
     {
-        $first = $colorsByProduct[$productId][0] ?? null;
+        if (null === $preferredVariantId) {
+            return $colors;
+        }
+        foreach ($colors as $i => $c) {
+            if ($c->variantId === $preferredVariantId && $i > 0) {
+                array_unshift($colors, $colors[$i]);
+                unset($colors[$i + 1]);
 
-        return null !== $first ? $first->path : '#';
+                return array_values($colors);
+            }
+        }
+
+        return $colors;
     }
 
     /**
      * @param list<int> $productIds
      *
-     * @return array<int,list<ColorRef>>
+     * @return array<int,list<ColorRef>> product id => colours, the product's default colour first
      */
     private function colorsForProducts(array $productIds, string $locale): array
     {
@@ -435,7 +456,7 @@ final class Catalog
              FROM '.ProductVariant::class.' v
              LEFT JOIN '.\App\Entity\Catalog\VariantTranslation::class.' vt ON vt.variant = v AND vt.locale = :l
              WHERE v.product IN (:ids)
-             ORDER BY v.position, v.id'
+             ORDER BY v.isDefault DESC, v.position, v.id'
         )->setParameter('l', $locale)->setParameter('ids', $productIds)->getArrayResult();
 
         $variantIds = array_map(static fn ($r) => (int) $r['vid'], $rows);
