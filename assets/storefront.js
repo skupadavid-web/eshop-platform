@@ -1,6 +1,6 @@
-/* Storefront progressive enhancement — E1.
- * Menus, accordions and the demo swatch/size/option toggles.
- * Real add-to-cart / filtering behaviour arrives in E4–E5. */
+/* Storefront progressive enhancement.
+ * Menu, accordions, quantity steppers, checkout shipping-address toggle.
+ * Colour and size selection work without JS (links / native radios). */
 
 function ready(fn) {
     if (document.readyState !== 'loading') fn();
@@ -29,22 +29,28 @@ ready(() => {
         if (mark) d.addEventListener('toggle', () => { mark.textContent = d.open ? '−' : '+'; });
     });
 
-    // --- demo toggles (visual only until E4/E5) ---
-    const groupToggle = (btn, groupSel) => {
-        btn.closest(groupSel)?.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', 'false'));
-        btn.setAttribute('aria-pressed', 'true');
-    };
-    document.querySelectorAll('.sizerow .sizechip:not([disabled])').forEach((b) =>
-        b.addEventListener('click', () => groupToggle(b, '.sizerow')));
-    document.querySelectorAll('.pd-buy .swatchrow .swatch, .pd-thumbs .pd-thumb').forEach((b) =>
-        b.addEventListener('click', () => {
-            document.querySelectorAll('.pd-buy .swatchrow .swatch, .pd-thumbs .pd-thumb')
-                .forEach((x) => x.setAttribute('aria-pressed', 'false'));
-            b.setAttribute('aria-pressed', 'true');
-        }));
-    document.querySelectorAll('.opt-cards').forEach((group) =>
-        group.querySelectorAll('.opt').forEach((b) =>
-            b.addEventListener('click', () => groupToggle(b, '.opt-cards'))));
+    // --- quantity steppers ---
+    document.querySelectorAll('.qty').forEach((q) => {
+        const input = q.querySelector('input');
+        if (!input) return;
+        const step = (delta) => {
+            const min = parseInt(input.min || '1', 10);
+            const max = parseInt(input.max || '99', 10);
+            const next = Math.min(max, Math.max(min, (parseInt(input.value, 10) || min) + delta));
+            input.value = String(next);
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+        };
+        q.querySelector('.qminus')?.addEventListener('click', () => step(-1));
+        q.querySelector('.qplus')?.addEventListener('click', () => step(1));
+    });
+
+    // --- checkout: reveal shipping-address fields ---
+    document.querySelectorAll('input[name="shipToDifferent"]').forEach((cb) => {
+        const box = document.querySelector('[data-ship-fields]');
+        const sync = () => { if (box) box.hidden = !cb.checked; };
+        cb.addEventListener('change', sync);
+        sync();
+    });
 
     // --- skip link moves focus to main content ---
     const skip = document.querySelector('.skip');

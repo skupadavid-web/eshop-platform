@@ -14,8 +14,9 @@
         <input type="search" name="q" aria-label="{{ 'search.label'|trans }}" placeholder="{{ 'search.placeholder'|trans }}">
     </form>
     <div class="hicons">
-        <a href="{{ path('cart') }}" class="iconbtn" aria-label="{{ 'cart.aria'|trans({'%n%': 0}) }}">
-            <span aria-hidden="true">🛒</span> {{ 'cart.title'|trans }}
+        {% set cc = cart_count() %}
+        <a href="{{ path('cart') }}" class="iconbtn" aria-label="{{ 'cart.aria'|trans({'%n%': cc}) }}">
+            <span aria-hidden="true">🛒</span> {{ 'cart.title'|trans }}{% if cc > 0 %}<span class="cart-count" aria-hidden="true">{{ cc }}</span>{% endif %}
         </a>
     </div>
 </div>

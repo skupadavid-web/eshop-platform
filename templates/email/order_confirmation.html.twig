@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="cs">
+<body style="font-family:Arial,Helvetica,sans-serif;color:#1a1a1a;line-height:1.5;max-width:600px;margin:0 auto;padding:16px">
+    <h1 style="font-size:20px">{{ 'email.order.thanks'|trans }}</h1>
+    <p>{{ 'email.order.intro'|trans({'%code%': order.code, '%store%': store.name}) }}</p>
+
+    <table style="width:100%;border-collapse:collapse;margin:16px 0">
+        {% for it in order.items %}
+            <tr>
+                <td style="padding:6px 0;border-bottom:1px solid #eee">{{ it.quantity }}× {{ it.nameSnapshot }}{{ it.variantSnapshot ? ' · ' ~ it.variantSnapshot : '' }}</td>
+                <td style="padding:6px 0;border-bottom:1px solid #eee;text-align:right">{{ it.lineTotal|money(order.currency) }}</td>
+            </tr>
+        {% endfor %}
+        <tr><td style="padding:6px 0">{{ 'checkout.shipping'|trans }}</td><td style="padding:6px 0;text-align:right">{{ order.shippingTotal|money(order.currency) }}</td></tr>
+        <tr><td style="padding:6px 0;font-weight:bold">{{ 'cart.total'|trans }}</td><td style="padding:6px 0;text-align:right;font-weight:bold">{{ order.grandTotal|money(order.currency) }}</td></tr>
+    </table>
+
+    <p><b>{{ 'checkout.step_delivery'|trans }}:</b> {{ order.shippingMethodCode }}{{ order.pickupPoint ? ' – ' ~ order.pickupPoint : '' }}<br>
+       <b>{{ 'checkout.payment'|trans }}:</b> {{ order.paymentMethodCode }}</p>
+
+    {% if payment %}
+        <h2 style="font-size:16px">{{ 'done.pay_info'|trans }}</h2>
+        <p>{{ 'done.account'|trans }}: <b>{{ payment.account ?: payment.iban }}</b><br>
+           {{ 'done.amount'|trans }}: <b>{{ order.grandTotal|money(order.currency) }}</b><br>
+           {{ 'done.vs'|trans }}: <b>{{ payment.vs }}</b><br>
+           IBAN: {{ payment.iban }}</p>
+        {% if payment.qrSvg %}<p><img src="{{ payment.qrSvg }}" width="180" height="180" alt="QR"></p>{% endif %}
+    {% endif %}
+
+    <p style="color:#666;font-size:13px;margin-top:24px">{{ legal.name }}, IČ {{ legal.ico }} · {{ store.host }}</p>
+</body>
+</html>

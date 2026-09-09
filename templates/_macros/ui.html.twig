@@ -29,10 +29,21 @@
 {% endmacro %}
 
 {% macro size_row(product) %}
-    <div class="sizerow" role="group" aria-label="{{ 'product.size'|trans }}">
+    <div class="sizerow" role="radiogroup" aria-label="{{ 'product.size'|trans }}">
         {% for s in product.sizes %}
-            <button type="button" class="sizechip" data-size-id="{{ s.variantSizeId }}" aria-pressed="{{ loop.first ? 'true' : 'false' }}"{{ s.available ? '' : ' disabled aria-label="' ~ s.label ~ ' – ' ~ ('product.sold_out'|trans) ~ '"' }}>{{ s.label }}</button>
+            <label class="sizechip{{ s.available ? '' : ' is-out' }}">
+                <input type="radio" name="variant_size_id" value="{{ s.variantSizeId }}"{{ loop.first ? ' checked' : '' }}{{ s.available ? ' required' : ' disabled' }} class="visually-hidden">
+                <span>{{ s.label }}</span>
+            </label>
         {% endfor %}
+    </div>
+{% endmacro %}
+
+{% macro qty_input() %}
+    <div class="qty">
+        <button type="button" class="qminus" aria-label="{{ 'qty.less'|trans }}">−</button>
+        <input type="number" name="qty" value="1" min="1" max="99" class="num" aria-label="{{ 'qty.label'|trans }}">
+        <button type="button" class="qplus" aria-label="{{ 'qty.more'|trans }}">+</button>
     </div>
 {% endmacro %}
 
@@ -42,6 +53,16 @@
         <input value="1" class="num" aria-label="{{ 'qty.label'|trans }}">
         <button type="button" aria-label="{{ 'qty.more'|trans }}">+</button>
     </div>
+{% endmacro %}
+
+{% macro checkout_field(name, label, data, errors, type='text', full=false) %}
+    <label class="field{{ full ? ' full' : '' }}">
+        <span>{{ label }}</span>
+        <input type="{{ type }}" name="{{ name }}" value="{{ attribute(data, name) }}"
+               {%- if type == 'email' %} autocomplete="email" inputmode="email"{% endif %}
+               {%- if name in ['firstName','lastName'] %} autocomplete="{{ name == 'firstName' ? 'given-name' : 'family-name' }}"{% endif %}>
+        {% if errors[name] is defined %}<span class="err">{{ errors[name]|trans }}</span>{% endif %}
+    </label>
 {% endmacro %}
 
 {% macro crumb(items) %}

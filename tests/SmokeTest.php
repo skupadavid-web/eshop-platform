@@ -123,9 +123,64 @@ final class SmokeTest extends WebTestCase
         yield 'category' => [self::CATEGORY_PATH];
         yield 'product variant' => [self::VARIANT_PATH];
         yield 'content page' => [self::PAGE_PATH];
-        yield 'cart' => ['/kosik'];
-        yield 'checkout' => ['/pokladna'];
+        yield 'cart (empty)' => ['/kosik'];
         yield 'search' => ['/hledani?q=testovaci'];
+    }
+
+    public function testEmptyCheckoutRedirectsToCart(): void
+    {
+        $client = static::createClient();
+        $client->request('GET', '/pokladna', server: ['HTTP_HOST' => 'trickaspotiskem.ddev.site']);
+
+        self::assertResponseRedirects('/kosik');
+    }
+
+    public function testAddToCartThenPlaceOrder(): void
+    {
+        $client = static::createClient();
+        $host = ['HTTP_HOST' => 'trickaspotiskem.ddev.site'];
+
+        // add the fixture variant-size to the cart
+        $crawler = $client->request('GET', self::VARIANT_PATH, server: $host);
+        $sizeId = (int) $crawler->filter('input[name="variant_size_id"]')->attr('value');
+        self::assertGreaterThan(0, $sizeId);
+        $addForm = $crawler->filter('form.buy-form')->form();
+        $addForm['variant_size_id'] = (string) $sizeId;
+        $addForm['qty'] = '2';
+        $client->submit($addForm);
+        self::assertResponseRedirects('/kosik');
+        $client->followRedirect();
+        self::assertSelectorTextContains('.cart-table', 'Testovací tričko');
+
+        // checkout
+        $crawler = $client->request('GET', '/pokladna', server: $host);
+        self::assertResponseIsSuccessful();
+        $client->submit($crawler->filter('form.checkout-form')->form([
+            'email' => 'kupujici@example.test',
+            'firstName' => 'Jan',
+            'lastName' => 'Novák',
+            'phone' => '+420605111222',
+            'street' => 'Květná 4',
+            'city' => 'Praha',
+            'zip' => '13000',
+            'country' => 'CZ',
+            'shippingMethod' => 'pickup',
+            'paymentMethod' => 'transfer',
+            'agreeTerms' => '1',
+        ]));
+        self::assertResponseRedirects('/hotovo');
+        $client->followRedirect();
+        self::assertSelectorTextContains('h1', 'Děkujeme za objednávku');
+
+        $em = self::getContainer()->get(EntityManagerInterface::class);
+        \assert($em instanceof EntityManagerInterface);
+        $order = $em->getRepository(\App\Entity\Order\Order::class)->findOneBy(['email' => 'kupujici@example.test']);
+        self::assertNotNull($order);
+        self::assertSame(698, $order->itemsTotal);         // 2 × 349
+        self::assertSame(0, $order->shippingTotal);        // pickup is free
+        self::assertSame(698, $order->grandTotal);
+        self::assertCount(1, $order->items);
+        self::assertStringStartsWith('TSP-', $order->code);
     }
 
     public function testUnknownPathIs404(): void

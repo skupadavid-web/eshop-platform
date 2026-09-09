@@ -2,8 +2,46 @@
 {% block title %}{{ 'cart.title'|trans }} — {{ store.name }}{% endblock %}
 {% block body %}
 <div class="wrap section-tight">
-    <h1 style="margin-bottom:20px">{{ 'cart.title'|trans }}</h1>
-    <p style="color:var(--ink-muted);padding:24px 0">{{ 'cart.empty'|trans }}</p>
-    <a href="{{ path('home') }}" class="btn btn-primary">{{ 'cart.continue_shopping'|trans }}</a>
+    <h1 style="margin-bottom:16px">{{ 'cart.title'|trans }}</h1>
+
+    {% if cart.isEmpty %}
+        <p style="color:var(--ink-muted);padding:20px 0">{{ 'cart.empty'|trans }}</p>
+        <a href="{{ path('home') }}" class="btn btn-primary">{{ 'cart.continue_shopping'|trans }}</a>
+    {% else %}
+    <form method="post" action="{{ path('cart_update') }}">
+        <input type="hidden" name="_token" value="{{ csrf_token('cart') }}">
+        <div class="cart-layout" style="display:grid;grid-template-columns:1.6fr 1fr;gap:32px;align-items:start">
+            <div>
+                <table class="cart-table">
+                    <caption class="visually-hidden">{{ 'cart.title'|trans }}</caption>
+                    <tbody>
+                    {% for l in cart.lines %}
+                        <tr>
+                            <td><a href="{{ l.path }}" class="cart-thumb" aria-hidden="true">{{ shirt(l.colorHex, 'blank') }}</a></td>
+                            <td>
+                                <a href="{{ l.path }}" style="font-weight:600">{{ l.name }}</a>
+                                <div class="ci-meta">{{ 'product.color'|trans }}: {{ l.colorName }} · {{ 'product.size'|trans }}: {{ l.size }}</div>
+                            </td>
+                            <td>
+                                <label class="visually-hidden" for="q{{ l.variantSizeId }}">{{ 'qty.label'|trans }}</label>
+                                <input id="q{{ l.variantSizeId }}" type="number" name="qty[{{ l.variantSizeId }}]" value="{{ l.quantity }}" min="0" max="99" class="num" style="width:60px;padding:7px;border:1px solid var(--line-strong);border-radius:8px">
+                            </td>
+                            <td style="text-align:right;font-weight:600;white-space:nowrap">{{ l.lineTotal|money }}</td>
+                            <td><button type="submit" name="remove" value="{{ l.variantSizeId }}" class="link" style="font-size:13px">{{ 'cart.remove'|trans }}</button></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <button type="submit" class="btn btn-ghost btn-sm">{{ 'cart.recalculate'|trans }}</button>
+            </div>
+            <aside class="summary">
+                <h2 style="font-size:16px;margin-bottom:8px">{{ 'cart.summary'|trans }}</h2>
+                <div class="row"><span>{{ 'cart.subtotal'|trans }} ({{ cart.itemCount }} {{ 'cart.pcs'|trans }})</span><span class="num">{{ cart.itemsTotal|money }}</span></div>
+                <div class="row"><span>{{ 'cart.shipping_note'|trans }}</span><span class="num">{{ 'cart.at_checkout'|trans }}</span></div>
+                <a href="{{ path('checkout') }}" class="btn btn-primary btn-lg" style="margin-top:14px;width:100%">{{ 'cart.to_checkout'|trans }}</a>
+            </aside>
+        </div>
+    </form>
+    {% endif %}
 </div>
 {% endblock %}

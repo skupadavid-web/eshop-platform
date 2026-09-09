@@ -1,9 +1,108 @@
 {% extends 'base.html.twig' %}
+{% import '_macros/ui.html.twig' as ui %}
 {% block title %}{{ 'checkout.title'|trans }} — {{ store.name }}{% endblock %}
 {% block body %}
 <div class="wrap section-tight">
-    <h1 style="margin-bottom:20px">{{ 'checkout.title'|trans }}</h1>
-    <p style="color:var(--ink-muted);padding:24px 0">{{ 'cart.empty'|trans }}</p>
-    <a href="{{ path('home') }}" class="btn btn-primary">{{ 'cart.continue_shopping'|trans }}</a>
+    <h1 style="margin-bottom:8px">{{ 'checkout.title'|trans }}</h1>
+
+    {% if errors is not empty %}
+        <div class="form-errors" role="alert">{{ 'checkout.fix_errors'|trans }}</div>
+    {% endif %}
+
+    <form method="post" action="{{ path('checkout') }}" class="checkout-form">
+        <input type="hidden" name="_token" value="{{ csrf_token('checkout') }}">
+        <div class="co-grid">
+            <div>
+                <section class="co-step">
+                    <h2 style="font-size:16px;margin:18px 0 6px">1. {{ 'checkout.step_delivery'|trans }}</h2>
+                    <div class="opt-list">
+                        {% for o in shippingOptions %}
+                            <label class="opt">
+                                <input type="radio" name="shippingMethod" value="{{ o.code }}"{{ data.shippingMethod == o.code ? ' checked' : '' }} required>
+                                <span>{{ o.label }}</span>
+                                <span class="oprice">{{ o.price > 0 ? o.price|money : ('free'|trans) }}</span>
+                            </label>
+                            {% if o.hasPickupPoints %}
+                                <label class="field full" style="margin:-2px 0 4px 30px">
+                                    <span>{{ 'checkout.pickup_point'|trans }}</span>
+                                    <input type="text" name="pickupPoint" value="{{ data.pickupPoint }}" placeholder="{{ 'checkout.pickup_placeholder'|trans }}">
+                                    {% if errors.pickupPoint is defined %}<span class="err">{{ errors.pickupPoint|trans }}</span>{% endif %}
+                                </label>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    {% if errors.shippingMethod is defined %}<p class="err">{{ errors.shippingMethod|trans }}</p>{% endif %}
+                </section>
+
+                <section class="co-step">
+                    <h2 style="font-size:16px;margin:18px 0 6px">2. {{ 'checkout.payment'|trans }}</h2>
+                    <div class="opt-list">
+                        {% for o in paymentOptions %}
+                            <label class="opt">
+                                <input type="radio" name="paymentMethod" value="{{ o.code }}"{{ data.paymentMethod == o.code ? ' checked' : '' }} required>
+                                <span>{{ o.label }}</span>
+                                <span class="oprice">{{ o.price > 0 ? ('+ ' ~ o.price|money) : ('free'|trans) }}</span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                    {% if errors.paymentMethod is defined %}<p class="err">{{ errors.paymentMethod|trans }}</p>{% endif %}
+                </section>
+
+                <section class="co-step">
+                    <h2 style="font-size:16px;margin:18px 0 6px">3. {{ 'checkout.step_details'|trans }}</h2>
+                    <div class="formgrid">
+                        {{ ui.checkout_field('email', 'E-mail', data, errors, 'email', true) }}
+                        {{ ui.checkout_field('firstName', 'form.first_name'|trans, data, errors) }}
+                        {{ ui.checkout_field('lastName', 'form.last_name'|trans, data, errors) }}
+                        {{ ui.checkout_field('phone', 'form.phone'|trans, data, errors, 'tel') }}
+                        {{ ui.checkout_field('company', 'form.company'|trans, data, errors) }}
+                        {{ ui.checkout_field('companyId', 'IČO', data, errors) }}
+                        {{ ui.checkout_field('vatId', 'DIČ', data, errors) }}
+                        {{ ui.checkout_field('street', 'form.street'|trans, data, errors, 'text', true) }}
+                        {{ ui.checkout_field('city', 'form.city'|trans, data, errors) }}
+                        {{ ui.checkout_field('zip', 'form.zip'|trans, data, errors) }}
+                        <label class="field">
+                            <span>{{ 'form.country'|trans }}</span>
+                            <select name="country">
+                                <option value="CZ"{{ data.country == 'CZ' ? ' selected' : '' }}>Česko</option>
+                                <option value="SK"{{ data.country == 'SK' ? ' selected' : '' }}>Slovensko</option>
+                            </select>
+                        </label>
+                    </div>
+                    <label class="consent"><input type="checkbox" name="shipToDifferent" value="1"{{ data.shipToDifferent ? ' checked' : '' }}> {{ 'form.diff_delivery'|trans }}</label>
+                    <div class="formgrid" {{ data.shipToDifferent ? '' : 'hidden' }} data-ship-fields>
+                        {{ ui.checkout_field('shipName', 'form.full_name'|trans, data, errors, 'text', true) }}
+                        {{ ui.checkout_field('shipStreet', 'form.street'|trans, data, errors, 'text', true) }}
+                        {{ ui.checkout_field('shipCity', 'form.city'|trans, data, errors) }}
+                        {{ ui.checkout_field('shipZip', 'form.zip'|trans, data, errors) }}
+                    </div>
+                    <label class="field full" style="margin-top:10px">
+                        <span>{{ 'checkout.note'|trans }}</span>
+                        <textarea name="note" rows="2">{{ data.note }}</textarea>
+                    </label>
+                </section>
+
+                <section class="co-step">
+                    <label class="consent">
+                        <input type="checkbox" name="agreeTerms" value="1"{{ data.agreeTerms ? ' checked' : '' }}>
+                        <span>{{ 'checkout.agree_terms'|trans }}{% if view.pagePath('obchodni-podminky') != '#' %} <a class="link" href="{{ view.pagePath('obchodni-podminky') }}">{{ 'footer.terms'|trans|lower }}</a>{% endif %}.</span>
+                    </label>
+                    {% if errors.agreeTerms is defined %}<p class="err">{{ errors.agreeTerms|trans }}</p>{% endif %}
+                    <label class="consent"><input type="checkbox" name="newsletter" value="1"{{ data.newsletter ? ' checked' : '' }}> {{ 'form.newsletter'|trans }}</label>
+                </section>
+            </div>
+
+            <aside class="summary">
+                <h2 style="font-size:16px;margin-bottom:8px">{{ 'checkout.your_order'|trans }}</h2>
+                {% for l in cart.lines %}
+                    <div class="row"><span>{{ l.quantity }}× {{ l.name }} ({{ l.size }})</span><span class="num">{{ l.lineTotal|money }}</span></div>
+                {% endfor %}
+                <div class="row total"><span>{{ 'cart.subtotal'|trans }}</span><span class="num">{{ cart.itemsTotal|money }}</span></div>
+                <p style="font-size:12px;color:var(--ink-faint);margin-top:8px">{{ 'checkout.shipping_added'|trans }}</p>
+                <button type="submit" class="btn btn-primary btn-lg" style="margin-top:14px;width:100%">{{ 'checkout.place_order'|trans }}</button>
+                <p style="font-size:12px;color:var(--ink-faint);margin-top:10px">{{ 'legal.prices_final'|trans }} {{ legal.name }}, IČ {{ legal.ico }}.</p>
+            </aside>
+        </div>
+    </form>
 </div>
 {% endblock %}

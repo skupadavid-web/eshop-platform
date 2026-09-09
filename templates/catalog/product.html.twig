@@ -39,19 +39,24 @@
                 {{ ui.swatch_row(product) }}
             </div>
             {% endif %}
-            {% if product.sizes is not empty %}
-            <div class="buy-field">
-                <div class="flabel"><span id="pdSizeLbl">{{ 'product.size'|trans }}</span></div>
-                {{ ui.size_row(product) }}
-            </div>
-            {% endif %}
-            <div class="buy-field">
-                <div class="flabel"><span>{{ 'qty.label'|trans }}</span></div>
-                {{ ui.qty() }}
-            </div>
-            <div class="buy-actions">
-                <button class="btn btn-primary btn-lg">{{ 'product.add_to_cart'|trans }} · {{ product.price|money }}</button>
-            </div>
+            <form method="post" action="{{ path('cart_add') }}" class="buy-form">
+                <input type="hidden" name="_token" value="{{ csrf_token('cart') }}">
+                {% if product.sizes is not empty %}
+                <div class="buy-field">
+                    <div class="flabel"><span id="pdSizeLbl">{{ 'product.size'|trans }}</span></div>
+                    {{ ui.size_row(product) }}
+                </div>
+                {% else %}
+                    <input type="hidden" name="variant_size_id" value="0">
+                {% endif %}
+                <div class="buy-field">
+                    <div class="flabel"><span>{{ 'qty.label'|trans }}</span></div>
+                    {{ ui.qty_input() }}
+                </div>
+                <div class="buy-actions">
+                    <button type="submit" class="btn btn-primary btn-lg">{{ 'product.add_to_cart'|trans }} · {{ product.price|money }}</button>
+                </div>
+            </form>
             <div class="delivery-mini">
                 <div><span>{{ 'ship.packeta_point'|trans }}</span><b>{{ (store.currency == 'EUR' ? 2.5 : 59)|money }}</b></div>
                 <div><span>{{ 'ship.post'|trans }}</span><b>{{ (store.currency == 'EUR' ? 3.9 : 89)|money }}</b></div>

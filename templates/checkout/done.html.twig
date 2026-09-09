@@ -1,10 +1,41 @@
 {% extends 'base.html.twig' %}
 {% block title %}{{ 'done.title'|trans }} — {{ store.name }}{% endblock %}
 {% block body %}
-<div class="wrap"><div class="confirm">
-    <div class="check" aria-hidden="true">✓</div>
-    <h1>{{ 'done.title'|trans }}</h1>
-    {% if code %}<p class="lede" style="text-align:center">{{ 'done.body'|trans({'%code%': code}) }}</p>{% endif %}
-    <a class="link" href="{{ path('home') }}">{{ 'done.back_home'|trans }}</a>
+<div class="wrap section-tight"><div class="content-page" style="max-width:720px;margin:0 auto">
+    <div style="text-align:center;font-size:40px" aria-hidden="true">✓</div>
+    <h1 style="text-align:center">{{ 'done.title'|trans }}</h1>
+
+    {% if order is null %}
+        <p class="lede" style="text-align:center">{{ 'done.generic'|trans }}</p>
+        <p style="text-align:center"><a class="btn btn-primary" href="{{ path('home') }}">{{ 'done.back_home'|trans }}</a></p>
+    {% else %}
+        <p class="lede" style="text-align:center">{{ 'done.body'|trans({'%code%': order.code}) }}</p>
+
+        <table class="spec-table" style="margin:18px 0">
+            {% for it in order.items %}
+                <tr><td>{{ it.quantity }}× {{ it.nameSnapshot }}{{ it.variantSnapshot ? ' · ' ~ it.variantSnapshot : '' }}</td><td style="text-align:right">{{ it.lineTotal|money }}</td></tr>
+            {% endfor %}
+            <tr><td>{{ 'checkout.shipping'|trans }} + {{ 'checkout.payment'|trans|lower }}</td><td style="text-align:right">{{ order.shippingTotal|money }}</td></tr>
+            <tr><td style="font-weight:700">{{ 'cart.total'|trans }}</td><td style="text-align:right;font-weight:700">{{ order.grandTotal|money }}</td></tr>
+        </table>
+
+        {% if payment %}
+            <h2 style="font-size:17px">{{ 'done.pay_info'|trans }}</h2>
+            <div class="qr-box">
+                {% if payment.qrSvg %}<img src="{{ payment.qrSvg }}" alt="{{ 'done.qr_alt'|trans }}">{% endif %}
+                <div>
+                    <div><b>{{ 'done.account'|trans }}:</b> {{ payment.account ?: payment.iban }}</div>
+                    <div><b>{{ 'done.amount'|trans }}:</b> {{ order.grandTotal|money }}</div>
+                    <div><b>{{ 'done.vs'|trans }}:</b> {{ payment.vs }}</div>
+                    <div style="font-size:13px;color:var(--ink-muted);margin-top:6px">{{ 'done.iban'|trans }}: {{ payment.iban }}</div>
+                </div>
+            </div>
+        {% elseif order.paymentMethodCode == 'cod' %}
+            <p>{{ 'done.cod_info'|trans }}</p>
+        {% endif %}
+
+        <p style="color:var(--ink-muted);font-size:14px">{{ 'done.email_sent'|trans({'%email%': order.email}) }}</p>
+        <p><a class="link" href="{{ path('home') }}">{{ 'done.back_home'|trans }}</a></p>
+    {% endif %}
 </div></div>
 {% endblock %}

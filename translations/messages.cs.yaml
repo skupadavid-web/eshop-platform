@@ -46,6 +46,10 @@ cart:
   to_checkout: Pokračovat k pokladně
   remove: Odebrat
   free_ship_hint: Přidejte za 141 Kč a máte dopravu Zásilkovnou zdarma.
+  recalculate: Přepočítat
+  pcs: ks
+  shipping_note: Doprava
+  at_checkout: spočítá se v pokladně
 
 pay:
   transfer: Bankovní převod
@@ -167,36 +171,57 @@ trust:
 
 checkout:
   title: Pokladna
-  step_delivery: Doprava a platba
+  step_delivery: Doprava
   payment: Platba
   step_details: Kontaktní a fakturační údaje
   step_review: Rekapitulace a dokončení
-  agree_terms: Odesláním objednávky souhlasím s
+  agree_terms: 'Odesláním objednávky souhlasím s obchodními podmínkami a se zpracováním osobních údajů pro vyřízení objednávky. Přečetl/a jsem si'
   place_order: Závazně objednat
   your_order: Vaše objednávka
-  items: 'položky, 3 ks'
   shipping: Doprava
+  note: Poznámka k objednávce
+  pickup_point: Výdejní místo
+  pickup_placeholder: 'Např. Zásilkovna, Praha 9, Kolbenova 5b'
+  fix_errors: Zkontrolujte prosím zvýrazněná pole.
+  shipping_added: 'Doprava a poplatek za platbu se přičtou v dalším kroku.'
+  error:
+    shipping: Vyberte způsob dopravy.
+    payment: Vyberte způsob platby.
+    pickup: Zadejte výdejní místo.
+    terms: Bez souhlasu s podmínkami nelze objednávku dokončit.
 
 form:
   first_name: Jméno
   last_name: Příjmení
+  full_name: Jméno a příjmení
   phone: Telefon
   company: Firma (nepovinné)
   street: Ulice a č.p.
   city: Město
   zip: PSČ
+  country: Země
   diff_delivery: Dodací adresa je jiná než fakturační
   gdpr: Souhlasím se zpracováním osobních údajů pro vyřízení objednávky.
   newsletter: Chci dostávat novinky e-mailem (lze kdykoli odhlásit).
 
 done:
   title: Děkujeme za objednávku
-  body: 'Objednávka č. %code% byla přijata. Potvrzení jsme poslali e-mailem.'
-  pay_card: Zaplatit kartou
-  step1: Zaplatíte online kartou nebo převodem (QR na faktuře).
-  step2: Vytiskneme motiv a připravíme zásilku — do 2 pracovních dnů.
-  step3: Pošleme Zásilkovnou, dostanete sledovací kód e-mailem a SMS.
+  body: 'Objednávka č. %code% byla přijata.'
+  generic: Objednávka byla přijata. Potvrzení jsme poslali e-mailem.
+  pay_info: Platební údaje
+  qr_alt: QR kód pro platbu
+  account: Účet
+  amount: Částka
+  vs: Variabilní symbol
+  iban: IBAN
+  cod_info: Objednávku zaplatíte při převzetí zásilky.
+  email_sent: 'Potvrzení a platební údaje jsme poslali na %email%.'
   back_home: Zpět na úvodní stranu
+
+email:
+  order:
+    thanks: Děkujeme za objednávku
+    intro: 'Vaše objednávka č. %code% v e-shopu %store% byla přijata. Níže je její rekapitulace.'
 
 contact:
   operator: Provozovatel
