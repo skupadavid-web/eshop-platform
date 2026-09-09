@@ -148,8 +148,11 @@ final class SmokeTest extends WebTestCase
         $addForm['variant_size_id'] = (string) $sizeId;
         $addForm['qty'] = '2';
         $client->submit($addForm);
-        self::assertResponseRedirects('/kosik');
+        self::assertResponseRedirects(self::VARIANT_PATH);  // stays on the product page
         $client->followRedirect();
+        self::assertSelectorExists('.cart-toast');
+
+        $crawler = $client->request('GET', '/kosik', server: $host);
         self::assertSelectorTextContains('.cart-table', 'Testovací tričko');
 
         // checkout

@@ -47,6 +47,8 @@ cart:
   continue_shopping: Pokračovať v nákupe
   free_ship_hint: Pridajte za 6 € a máte dopravu Packetou zadarmo.
   recalculate: Prepočítať
+  added: Tovar pridaný do košíka.
+  view: Prejsť do košíka
   pcs: ks
   shipping_note: Doprava
   at_checkout: vypočíta sa v pokladni

@@ -47,6 +47,8 @@ cart:
   remove: Odebrat
   free_ship_hint: Přidejte za 141 Kč a máte dopravu Zásilkovnou zdarma.
   recalculate: Přepočítat
+  added: Zboží přidáno do košíku.
+  view: Přejít do košíku
   pcs: ks
   shipping_note: Doprava
   at_checkout: spočítá se v pokladně

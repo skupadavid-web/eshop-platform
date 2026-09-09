@@ -41,7 +41,25 @@ final class CartController extends AbstractController
             $this->addFlash('cart', 'added');
         }
 
-        return $this->redirectToRoute('cart');
+        // stay where the customer was so they can keep browsing
+        return $this->redirect($this->safeBackUrl($request));
+    }
+
+    private function safeBackUrl(Request $request): string
+    {
+        foreach ([$request->request->get('redirect_to'), $request->headers->get('referer')] as $candidate) {
+            if (!\is_string($candidate) || '' === $candidate) {
+                continue;
+            }
+            $path = (string) (parse_url($candidate, \PHP_URL_PATH) ?: '');
+            if (str_starts_with($path, '/') && !str_starts_with($path, '//')) {
+                $query = (string) (parse_url($candidate, \PHP_URL_QUERY) ?: '');
+
+                return $path.('' !== $query ? '?'.$query : '');
+            }
+        }
+
+        return $this->generateUrl('home');
     }
 
     #[Route('/kosik/upravit', name: 'cart_update', methods: ['POST'], priority: 10)]

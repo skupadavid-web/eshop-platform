@@ -18,6 +18,12 @@
 <body>
     <a href="#obsah" class="skip">{{ 'skip_to_content'|trans }}</a>
     {% include '_partials/header.html.twig' %}
+    {% for msg in app.flashes('cart') %}
+        <div class="wrap"><div class="cart-toast" role="status">
+            <span>✓ {{ 'cart.added'|trans }}</span>
+            <a href="{{ path('cart') }}" class="btn btn-sm btn-primary">{{ 'cart.view'|trans }}</a>
+        </div></div>
+    {% endfor %}
     <main id="obsah" tabindex="-1">{% block body %}{% endblock %}</main>
     {% include '_partials/footer.html.twig' %}
 </body>

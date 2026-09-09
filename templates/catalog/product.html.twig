@@ -41,6 +41,7 @@
             {% endif %}
             <form method="post" action="{{ path('cart_add') }}" class="buy-form">
                 <input type="hidden" name="_token" value="{{ csrf_token('cart') }}">
+                <input type="hidden" name="redirect_to" value="{{ product.path }}">
                 {% if product.sizes is not empty %}
                 <div class="buy-field">
                     <div class="flabel"><span id="pdSizeLbl">{{ 'product.size'|trans }}</span></div>
